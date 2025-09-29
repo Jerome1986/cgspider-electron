@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4769557 */
-  src: url('iconfont.woff2?t=1759047541355') format('woff2'),
-       url('iconfont.woff?t=1759047541355') format('woff'),
-       url('iconfont.ttf?t=1759047541355') format('truetype');
+  src: url('iconfont.woff2?t=1759125289407') format('woff2'),
+       url('iconfont.woff?t=1759125289407') format('woff'),
+       url('iconfont.ttf?t=1759125289407') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,42 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-tietu2:before {
+  content: "\e6e1";
+}
+
+.icon-tietu1:before {
+  content: "\e82c";
+}
+
+.icon-caizhi:before {
+  content: "\e636";
+}
+
+.icon-caizhi1:before {
+  content: "\e69c";
+}
+
+.icon-dengguang:before {
+  content: "\e603";
+}
+
+.icon-bg-model:before {
+  content: "\e647";
+}
+
+.icon-model:before {
+  content: "\e66e";
+}
+
+.icon-huiyuan:before {
+  content: "\e8b1";
+}
+
+.icon-huiyuan1:before {
+  content: "\e8c5";
 }
 
 .icon-zuixiaohua3:before {
@@ -129,23 +165,7 @@
   content: "\e60b";
 }
 
-.icon-moxing:before {
-  content: "\e61c";
-}
-
 .icon-bendi:before {
   content: "\e600";
-}
-
-.icon-caizhiku:before {
-  content: "\e671";
-}
-
-.icon-a-ziyuan349:before {
-  content: "\e601";
-}
-
-.icon-tietuku-copy:before {
-  content: "\eb08";
 }
 

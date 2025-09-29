@@ -3,12 +3,13 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { changeWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
+import { openPaymentWindow } from '@main/window/payWindow'
 
 function createWindow(): void {
   // 创建浏览器窗口。
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    minWidth: 1050,
+    minHeight: 860,
     show: false,
     autoHideMenuBar: true,
     frame: false,
@@ -33,6 +34,11 @@ function createWindow(): void {
 
   // 添加选择文件夹处理
   ipcMain.handle('select-download-path', () => selectDownloadPath(mainWindow))
+
+  // 创建支付订单窗口
+  ipcMain.handle('creatOrder', (_, payUrl) => {
+    openPaymentWindow(payUrl, mainWindow)
+  })
 
   // 显示主窗口
   mainWindow.on('ready-to-show', () => {

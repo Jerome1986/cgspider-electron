@@ -1,6 +1,7 @@
 export interface MenuItem {
   id: string
   name: string
+  en_name: string
   path: string
   icon: string
   activeIcon: string
@@ -10,30 +11,41 @@ export const menuList: MenuItem[] = [
   {
     id: 'model',
     name: '模型',
+    en_name: 'model',
     path: '/model',
-    icon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/model.png',
-    activeIcon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/model_select.png'
+    icon: 'icon-bg-model',
+    activeIcon: 'icon-model'
   },
-
   {
     id: 'maps',
     name: '贴图',
+    en_name: 'maps',
     path: '/maps',
-    icon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/maps.png',
-    activeIcon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/maps_select.png'
+    icon: 'icon-tietu1',
+    activeIcon: 'icon-tietu2'
   },
   {
     id: 'lighting',
     name: '灯光',
+    en_name: 'lighting',
     path: '/lighting',
-    icon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/lighting.png',
-    activeIcon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/lighting_select.png'
+    icon: 'icon-dengguang',
+    activeIcon: 'icon-dengguang'
   },
   {
     id: 'material',
     name: '材质',
+    en_name: 'material',
     path: '/material',
-    icon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/material.png',
-    activeIcon: 'https://objectstorageapi.gzg.sealos.run/dxepxlzz-cgs-images/tarbar/material_select.png'
+    icon: 'icon-caizhi',
+    activeIcon: 'icon-caizhi1'
+  },
+  {
+    id: 'vip',
+    name: '会员',
+    en_name: 'vip',
+    path: '/vipProduct',
+    icon: 'icon-huiyuan1',
+    activeIcon: 'icon-huiyuan'
   }
 ]

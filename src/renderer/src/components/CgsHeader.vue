@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import {
@@ -12,18 +12,24 @@ import {
   handleSelectPath,
   handleSavePath
 } from '@/utils/header'
-import { usePathStore } from '@/stores'
+import { usePathStore, useLanguageStore } from '@/stores'
 
 // 定义store
 const pathStore = usePathStore()
+const languageStore = useLanguageStore()
+
+// 页面切换语言
+const languageSwitch = ref(languageStore.languageSwitch ?? false)
+const handleChangeSwitch = (val: boolean | string | number): void => {
+  const next = val === true || val === 'true' || val === 1
+  languageSwitch.value = next
+  languageStore.setLanguageSwitch(next)
+}
 
 // 导入路由
 const router = useRouter()
 // 用户全局管理
 const userStore = useUserStore()
-
-// 切换语言
-const languageSwitch = ref(false)
 
 // 功能菜单
 const showMenu = ref(false)
@@ -42,7 +48,7 @@ const handleMenuItem = (action: string) => {
     case 'vip':
       // 进入会员信息页面
       console.log('会员页面')
-      router.push('/vip')
+      router.push('/vipProduct')
       break
     case 'logout':
       // 处理退出登录
@@ -51,6 +57,11 @@ const handleMenuItem = (action: string) => {
   }
   showMenu.value = false
 }
+
+// 语言开关
+const isEN = computed(() => languageStore.languageSwitch)
+// 文本助手（优先英文，缺失则回退中文）
+const t = (cn: string, en: string): string => (isEN.value ? en : cn)
 
 // 页面挂载完毕
 onMounted(() => {})
@@ -65,18 +76,19 @@ onMounted(() => {})
         <img :src="userStore.userInfo.userAvatarUrl" alt="头像" />
       </div>
       <!--   昵称   -->
-      <div class="username">{{ userStore.userInfo.username }}</div>
+      <div class="username">{{ t('用户名', 'username') }}：{{ userStore.userInfo.username }}</div>
       <!--   剩余金币   -->
-      <div class="gold">金币：{{ userStore.userInfo.coins }}</div>
+      <div class="gold">{{ t('金币', 'gold') }}：{{ userStore.userInfo.coins }}</div>
       <!--   身份   -->
-      <div class="role">{{ userStore.userInfo.role }}</div>
+      <div class="role">{{ t('身份', 'role') }}：{{ userStore.userInfo.role }}</div>
       <!--   切换语言   -->
       <el-switch
         v-model="languageSwitch"
         class="ml-2"
         size="small"
         style="--el-switch-on-color: #409eff"
-        :active-text="languageSwitch ? '英文' : '中文'"
+        :active-text="languageStore.languageSwitch ? 'EN' : '中文'"
+        @change="handleChangeSwitch"
       />
     </div>
 

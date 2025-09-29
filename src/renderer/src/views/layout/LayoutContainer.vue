@@ -1,37 +1,49 @@
+<!--suppress ALL -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { MenuItem, menuList } from '@/config/menu'
 import { useRouter } from 'vue-router'
 import CgsHeader from '@/components/CgsHeader.vue'
+import { useLanguageStore } from '@/stores'
 
+// 语言开关
+const languageStore = useLanguageStore()
+const isEN = computed(() => languageStore.languageSwitch)
+
+// 路由
 const router = useRouter()
-const tabActiveIndex = ref(0)
-const handleMenuClick = (item: MenuItem, index: number) => {
-  tabActiveIndex.value = index
-  router.push(item.path)
-}
+// 用计算属性根据当前路径来跳转
+const tabActiveIndex = computed(() => {
+  return router.currentRoute.value.path
+})
+
+const getName = (it: MenuItem): string => (isEN.value ? (it.en_name ?? it.name) : it.name)
 </script>
 
 <template>
   <el-container class="layout-container">
     <!--  侧边  -->
-    <el-aside width="56px">
+    <el-aside width="60px">
       <!--  logo    -->
       <div class="logo">
         <img src="../../assets/images/icon.png" alt="logo" />
       </div>
       <!--   类型tab   -->
       <div
-        v-for="(item, index) in menuList"
+        v-for="item in menuList"
         :key="item.id"
         class="tabs"
-        :class="{ activeTab: tabActiveIndex === index }"
-        @click="handleMenuClick(item, index)"
+        :class="{ activeTab: tabActiveIndex === item.path }"
+        @click="$router.push({ path: item.path })"
       >
         <!--   图标    -->
-        <img class="icon" :src="tabActiveIndex === index ? item.activeIcon : item.icon" alt="model_select" />
+        <i
+          class="iconfont"
+          :class="tabActiveIndex === item.path ? item.icon : item.activeIcon"
+          style="font-size: 18px"
+        />
         <!--   文字    -->
-        <div class="text">{{ item.name }}</div>
+        <div class="text">{{ getName(item) }}</div>
       </div>
     </el-aside>
     <el-container>
@@ -40,11 +52,11 @@ const handleMenuClick = (item: MenuItem, index: number) => {
         <cgs-header></cgs-header>
       </el-header>
       <!--   主体内容   -->
-      <el-main style="margin: 0; padding: 0">
+      <el-main style="margin: 0; padding: 0; border-top: 1px solid #2f2e2e; border-left: 1px solid #2f2e2e">
         <router-view></router-view>
       </el-main>
       <!--  底部    -->
-      <el-footer></el-footer>
+      <!--      <el-footer></el-footer>-->
     </el-container>
   </el-container>
 </template>
@@ -74,17 +86,14 @@ const handleMenuClick = (item: MenuItem, index: number) => {
       color: $cgs-font-dec;
       cursor: pointer;
 
-      .icon {
-        width: 20px;
-        height: 20px;
-      }
       .text {
+        margin-top: 4px;
         font-size: 12px;
       }
     }
 
     .activeTab {
-      color: #ffffff;
+      color: $cgs-brandColor;
     }
   }
 

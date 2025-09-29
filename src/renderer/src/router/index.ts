@@ -46,6 +46,12 @@ const router = createRouter({
           path: '/material',
           name: 'Material',
           component: () => import('@/views/material/MaterialPage.vue')
+        },
+        // 会员产品页面
+        {
+          path: '/vipProduct',
+          nam: 'VipProduct',
+          component: () => import('@/views/vipProduct/VipProduct.vue')
         }
       ]
     }
