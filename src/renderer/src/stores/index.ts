@@ -13,3 +13,4 @@ export default pinia
 export * from './modules/user'
 export * from './modules/path'
 export * from './modules/globalLanguage'
+export * from './modules/pageType'

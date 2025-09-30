@@ -17,7 +17,7 @@ export const useUserStore = defineStore(
     }
 
     // 清空token
-    const clearToken = (): string => (userInfo.value = createDefaultUserInfo())
+    const clearToken = (): LoginResponse => (userInfo.value = createDefaultUserInfo())
 
     return {
       userInfo,

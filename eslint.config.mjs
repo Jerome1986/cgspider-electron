@@ -23,9 +23,11 @@ export default defineConfig(
   },
   {
     files: ['**/*.{ts,mts,tsx,vue}'],
+    plugins: { vue: eslintPluginVue }, // 关键：注册插件别名
     rules: {
       'vue/require-default-prop': 'off',
       'vue/multi-word-component-names': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
       'vue/block-lang': [
         'error',
         {

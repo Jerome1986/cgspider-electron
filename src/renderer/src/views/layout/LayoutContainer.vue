@@ -4,8 +4,9 @@ import { computed } from 'vue'
 import { MenuItem, menuList } from '@/config/menu'
 import { useRouter } from 'vue-router'
 import CgsHeader from '@/components/CgsHeader.vue'
-import { useLanguageStore } from '@/stores'
+import { useLanguageStore, usePageTypeStore } from '@/stores'
 
+const pageTypeStore = usePageTypeStore()
 // 语言开关
 const languageStore = useLanguageStore()
 const isEN = computed(() => languageStore.languageSwitch)
@@ -14,6 +15,9 @@ const isEN = computed(() => languageStore.languageSwitch)
 const router = useRouter()
 // 用计算属性根据当前路径来跳转
 const tabActiveIndex = computed(() => {
+  // 将当前路径保存，方便根据页面类型请求数据
+  pageTypeStore.setCurrentPagePath(router.currentRoute.value.path)
+  pageTypeStore.setCurrentPageType(router.currentRoute.value.path)
   return router.currentRoute.value.path
 })
 

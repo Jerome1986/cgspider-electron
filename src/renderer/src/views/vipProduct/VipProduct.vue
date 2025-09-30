@@ -7,6 +7,7 @@ import { coins, membership } from '@/views/vipProduct/configData'
 import SkeletonScreen from '@/views/vipProduct/components/SkeletonScreen.vue'
 import { payOrderApi } from '@/api/order'
 import { useUserStore } from '@/stores'
+import { userIdInfoGetApi } from '@/api/user'
 
 // 定义store
 const userStore = useUserStore()
@@ -35,11 +36,25 @@ const handleCoinsBuy = async (item: ProductItem) => {
   console.log(' 支付', res)
 }
 
+// 处理购买会员
+const handleVipBuy = async (item: ProductItem) => {
+  console.log('办理会员', item)
+  const res = await payOrderApi(userStore.userInfo._id, item._id)
+  window.electron.ipcRenderer.invoke('creatOrder', res.data.pay_url)
+}
+
 onMounted(async () => {
   await productGet()
-  const handler = (_, status: string) => {
+  // 支付成功处理
+  const handler = async (_, status: string) => {
     // SUCCESS / FAIL ...
     console.log('payment-status:', status)
+    if (status === 'success') {
+      //   重新拉取用户信息
+      const res = await userIdInfoGetApi(userStore.userInfo._id)
+      console.log('更新后的信息', res)
+      userStore.setUserInfo(res.data)
+    }
   }
   // 接收支付状态消息
   window.electron.ipcRenderer.on('payment-status', handler)
@@ -55,7 +70,7 @@ onMounted(async () => {
       <!-- 产品卡片：数据与语言同步后的标题 -->
       <template v-else>
         <ProductCard :title="coins" :product-item="coinProducts" @buy="handleCoinsBuy" />
-        <ProductCard :title="membership" :product-item="vipProducts" />
+        <ProductCard :title="membership" :product-item="vipProducts" @buy="handleVipBuy" />
       </template>
     </div>
   </div>

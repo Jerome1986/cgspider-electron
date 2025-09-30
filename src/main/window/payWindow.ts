@@ -34,9 +34,10 @@ export function openPaymentWindow(payUrl?: string, parent?: BrowserWindow): Brow
     if (url === 'https://api.xunhupay.com/payments/home/success') {
       console.log('支付成功')
       status = 'success'
-
       setTimeout(() => {
-        payWin?.close()
+        if (payWin && !payWin.isDestroyed()) {
+          payWin.close()
+        }
       }, 500)
     } else {
       status = 'cancel'
@@ -46,9 +47,10 @@ export function openPaymentWindow(payUrl?: string, parent?: BrowserWindow): Brow
   payWin.on('ready-to-show', () => payWin?.show())
   // 监听窗口关闭
   payWin.on('closed', () => {
+    console.log('用户关闭支付窗口')
+    status = status === 'success' ? 'success' : 'cancel'
     // 发送消息到渲染进程
     parent?.webContents.send('payment-status', status)
-
     payWin = null
   })
 

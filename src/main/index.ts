@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { changeWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
+import { changeWindow, quitWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
 import { openPaymentWindow } from '@main/window/payWindow'
 
 function createWindow(): void {
@@ -24,6 +24,14 @@ function createWindow(): void {
   // 处理窗口鼠标按住移动---拖拽效果
   ipcMain.handle('custom-adsorption', (_, res) => {
     mainWindow.setPosition(res.appX, res.appY)
+  })
+
+  // 登录页面处理退出
+  ipcMain.handle('quit', async () => {
+    const result = await quitWindow(mainWindow)
+    if (result.response === 1) {
+      app.quit()
+    }
   })
 
   // 处理窗口缩小放大和关闭

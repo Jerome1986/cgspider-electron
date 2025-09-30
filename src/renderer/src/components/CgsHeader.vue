@@ -13,6 +13,9 @@ import {
   handleSavePath
 } from '@/utils/header'
 import { usePathStore, useLanguageStore } from '@/stores'
+import { formatTimestamp } from '@/utils/formatTimestamp'
+import { calcMembershipLeft } from '@/utils/calcMembershipLeft'
+import { vipEndTimePutApi } from '@/api/user'
 
 // 定义store
 const pathStore = usePathStore()
@@ -64,7 +67,19 @@ const isEN = computed(() => languageStore.languageSwitch)
 const t = (cn: string, en: string): string => (isEN.value ? en : cn)
 
 // 页面挂载完毕
-onMounted(() => {})
+onMounted(async () => {
+  const vipEndInfo = calcMembershipLeft(userStore.userInfo.membershipExpiry)
+  if (vipEndInfo.expired && userStore.userInfo.membershipType !== 'free') {
+    // 1. 前端立即更新用户身份，避免 UI 闪烁
+    userStore.userInfo.membershipType = 'free'
+    // 2. 异步通知后端
+    try {
+      await vipEndTimePutApi(userStore.userInfo._id)
+    } catch (e) {
+      console.error('同步会员状态失败', e)
+    }
+  }
+})
 </script>
 
 <template>
@@ -90,6 +105,12 @@ onMounted(() => {})
         :active-text="languageStore.languageSwitch ? 'EN' : '中文'"
         @change="handleChangeSwitch"
       />
+      <!--  可下载次数  -->
+      <div class="downLimit">下载次数：{{ userStore.userInfo.dailyDownloadLimit }}</div>
+      <!-- 会员到期时间  -->
+      <div v-if="userStore.userInfo.role === 'vip'" class="vipEndTime">
+        {{ t('会员到期时间', 'endTime') }}：{{ formatTimestamp(userStore.userInfo.membershipExpiry!) }}
+      </div>
     </div>
 
     <!--  功能  -->
@@ -160,6 +181,7 @@ onMounted(() => {})
 
 <!--suppress SassScssResolvedByNameOnly -->
 <style lang="scss" scoped>
+@use 'sass:color';
 .cgsHeader {
   display: flex;
   justify-content: space-between;
@@ -183,6 +205,21 @@ onMounted(() => {})
       height: 30px;
       border-radius: 50%;
       overflow: hidden;
+    }
+
+    /* 会员到期时间：低饱和品牌色渐变，避免刺眼 */
+    .vipEndTime {
+      margin-left: 20px;
+      // 将品牌色与白色混合，降低饱和度，做左右渐变
+      $start: color.mix($cgs-brandColor, #ffffff, 70%);
+      $end: color.mix($cgs-brandColor, #ffffff, 40%);
+      background: linear-gradient(90deg, $start 0%, $end 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      opacity: 0.9; // 进一步压低亮度，避免刺眼
     }
 
     /*切换语言*/

@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron'
+import { app, BrowserWindow, dialog } from 'electron'
 
 // 控制窗口状态 --最小化 --最大化 --关闭窗口
 export const changeWindow = (val: string, mainWindow: BrowserWindow) => {
@@ -13,7 +13,21 @@ export const changeWindow = (val: string, mainWindow: BrowserWindow) => {
       mainWindow.unmaximize()
       break
     case 'close':
-      mainWindow.close()
+      console.log('程序退出')
+      app.quit()
       break
   }
+}
+
+// 关闭退出程序
+export const quitWindow = async (mainWindow: BrowserWindow) => {
+  return await dialog.showMessageBox(mainWindow, {
+    type: 'question',
+    title: '提示',
+    message: '确定要退出程序吗？',
+    buttons: ['取消', '确定退出'],
+    defaultId: 1, // 默认选中确定
+    cancelId: 0,
+    normalizeAccessKeys: true // 在Windows/Linux上可能会影响布局
+  })
 }

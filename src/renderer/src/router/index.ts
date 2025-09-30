@@ -50,7 +50,7 @@ const router = createRouter({
         // 会员产品页面
         {
           path: '/vipProduct',
-          nam: 'VipProduct',
+          name: 'VipProduct',
           component: () => import('@/views/vipProduct/VipProduct.vue')
         }
       ]

@@ -153,7 +153,10 @@ const resetRegister = (): void => {
   registerFormRef.value?.resetFields()
 }
 
-// 鼠标按住拖动
+// 处理退出
+const handleClose = () => {
+  window.electron.ipcRenderer.invoke('quit')
+}
 </script>
 
 <template>
@@ -217,6 +220,10 @@ const resetRegister = (): void => {
 
         <p class="register-tip">已有账号？<span class="register-link" @click="toggleMode">去登录</span></p>
       </el-form>
+    </div>
+    <!--  悬浮按钮  -->
+    <div class="floatBtn" @click="handleClose">
+      <el-button circle>x</el-button>
     </div>
   </div>
 </template>
@@ -292,8 +299,8 @@ const resetRegister = (): void => {
         margin: 8px 0 6px;
 
         :deep(.el-button--primary) {
-          --el-button-bg-color: #427b02;
-          --el-button-border-color: #427b02;
+          --el-button-bg-color: $cgs-brandColor;
+          --el-button-border-color: $cgs-brandColor;
         }
       }
 
@@ -305,9 +312,51 @@ const resetRegister = (): void => {
         font-size: 13px;
 
         .register-link {
-          color: #427b02;
+          color: $cgs-brandColor;
           cursor: pointer;
         }
+      }
+    }
+  }
+
+  // ============================
+  // 悬浮按钮
+  // ============================
+
+  .floatBtn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+
+    // 适配深色主题的圆形按钮
+    :deep(.el-button) {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: $cgs-font-title;
+      box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+      backdrop-filter: saturate(120%) blur(6px);
+      -webkit-backdrop-filter: saturate(120%) blur(6px);
+      transition:
+        box-shadow 0.25s ease,
+        transform 0.2s ease,
+        background 0.25s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow:
+          0 10px 28px rgba(0, 0, 0, 0.45),
+          0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      }
+      &:active {
+        transform: translateY(0);
+        box-shadow:
+          0 4px 14px rgba(0, 0, 0, 0.35),
+          0 0 0 1px rgba(255, 255, 255, 0.06) inset;
       }
     }
   }
