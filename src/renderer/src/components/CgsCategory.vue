@@ -1,163 +1,121 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { Category, SubCategory, ThirdCategory } from '@/types/CateItem'
+import { onMounted, ref } from 'vue'
+import { useCategoryStore, useLanguageStore, usePageTypeStore } from '@/stores'
 
-/**
- * 组件入参（cateList 为树形：一级→二级→三级）
- */
-const props = defineProps<{
-  cateList?: Category[]
-}>()
+// 定义store
+const pageTypeStore = usePageTypeStore()
+const categoryStore = useCategoryStore()
+const languageStore = useLanguageStore()
 
-/**
- * 组件对外事件
- * - changeCate: 选择二级分类时触发，参数为二级 _id
- * - changeThird: 选择三级分类时触发，参数为三级 _id
- * - allCate: 点击任一“全部”时触发（清空所选）
- */
-const emits = defineEmits<{
-  (e: 'changeCate', id: string): void
-  (e: 'changeThird', id: string): void
-  (e: 'allCate'): void
-}>()
+// 一级分类
+const activeCateId = ref('')
+const selectAllCate = () => {
+  console.log('全部')
+  activeCateId.value = ''
+  activeSubCateId.value = ''
+  activeThirdCateId.value = ''
+}
 
-/** 当前选中的一级分类 _id（空串代表“全部”） */
-const activeParentId = ref<string>('')
-/** 当前选中的二级分类 _id（空串代表“全部”或未选） */
-const activeSubId = ref<string>('')
-/** 当前选中的三级分类 _id（空串代表“全部”或未选） */
-const activeThirdId = ref<string>('')
+// 一级分类发生改变时
+const handleChangeCate = async (cateId: string) => {
+  console.log(cateId)
+  // 重置二级分类
+  activeSubCateId.value = ''
+  activeThirdCateId.value = ''
 
-/** 一级分类列表（来自 props） */
-const parents = computed<Category[]>(() => props.cateList ?? [])
-/** 当前一级下的二级列表 */
-const currentSubs = computed<SubCategory[]>(() => {
-  const p = parents.value.find((c) => (c._id ?? '') === activeParentId.value)
-  return p?.subCategories ?? []
+  // 根据一级分类渲染二级分类
+  activeCateId.value = cateId
+  await categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 2)
+}
+
+// 二级分类点击全部
+const activeSubCateId = ref('')
+const selectAllSub = () => {
+  activeSubCateId.value = ''
+  activeThirdCateId.value = ''
+}
+
+// 二级分类发生改变时
+const handleChangeSubCate = async (cateId: string) => {
+  console.log(cateId)
+  // 重置三级分类ID
+  activeThirdCateId.value = ''
+
+  // 根据二级分类ID获取三级分类
+  activeSubCateId.value = cateId
+  await categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 3)
+}
+
+// 三级分类
+const activeThirdCateId = ref('')
+const selectAllThird = () => {
+  activeThirdCateId.value = ''
+}
+
+// 三级分类改变时
+const handleChangeThirdCate = (cateId: string) => {
+  console.log(cateId)
+  activeThirdCateId.value = cateId
+}
+
+onMounted(async () => {
+  // 默认渲染一级分类
+  await categoryStore.categoryListGet(pageTypeStore.currentPageType)
 })
-/** 当前二级下的三级列表（从树结构中直接获取） */
-const currentThirds = computed<ThirdCategory[]>(() => {
-  const sub = currentSubs.value.find((s) => s._id === activeSubId.value)
-  return sub?.subCategories ?? []
-})
-
-/** 选择一级分类（会重置二级与三级选择） */
-function selectParent(id: string): void {
-  if (activeParentId.value === id) return
-  activeParentId.value = id
-  activeSubId.value = ''
-  activeThirdId.value = ''
-}
-
-/** 选择二级分类（会重置三级选择，并向外发出 changeCate） */
-function selectSub(id: string): void {
-  if (!id || activeSubId.value === id) return
-  activeSubId.value = id
-  activeThirdId.value = ''
-  emits('changeCate', id)
-}
-
-/** 选择三级分类（向外发出 changeThird） */
-function selectThird(id: string): void {
-  if (!id || activeThirdId.value === id) return
-  activeThirdId.value = id
-  emits('changeThird', id)
-}
-
-/** 一级“全部”——清空所有级别的选择并通知外部 */
-function selectAllParent(): void {
-  if (activeParentId.value === '') return
-  activeParentId.value = ''
-  activeSubId.value = ''
-  activeThirdId.value = ''
-  emits('allCate')
-}
-
-/** 二级“全部”——清空二级与三级选择并通知外部 */
-function selectAllSub(): void {
-  if (activeSubId.value === '' && activeThirdId.value === '') return
-  activeSubId.value = ''
-  activeThirdId.value = ''
-  emits('allCate')
-}
-
-/** 三级“全部”——仅清空三级选择并通知外部 */
-function selectAllThird(): void {
-  if (activeThirdId.value === '') return
-  activeThirdId.value = ''
-  emits('allCate')
-}
-
-/** 初次挂载：若存在一级列表则默认选中第一个，便于呈现二级 */
-onMounted(() => {
-  if (parents.value.length && !activeParentId.value) {
-    activeParentId.value = String(parents.value[0]._id ?? '')
-  }
-})
-
-/** 监听分类数据变化：重置并保持默认第一项选中 */
-watch(
-  () => props.cateList,
-  (list) => {
-    if (list && list.length) {
-      activeParentId.value = String(list[0]._id ?? '')
-      activeSubId.value = ''
-      activeThirdId.value = ''
-    } else {
-      activeParentId.value = ''
-      activeSubId.value = ''
-      activeThirdId.value = ''
-    }
-  }
-)
 </script>
 
 <template>
   <div class="filter-container">
     <!-- 一级分类：单排，单选 -->
     <div class="filter-section">
-      <h3>分类</h3>
+      <h3>{{ languageStore.gt('一级分类', 'Top Level') }}</h3>
       <div class="row parent-row">
-        <button :class="{ selected: activeParentId === '' }" @click="selectAllParent">全部</button>
+        <button :class="{ selected: activeCateId === '' }" @click="selectAllCate">
+          {{ languageStore.gt('全部', 'ALL') }}
+        </button>
         <button
-          v-for="cat in parents"
-          :key="cat._id || cat.name"
-          :class="{ selected: activeParentId === String(cat._id ?? '') }"
-          @click="selectParent(String(cat._id ?? ''))"
+          v-for="item in categoryStore.cateList"
+          :key="item._id"
+          :class="{ selected: activeCateId === String(item._id ?? '') }"
+          @click="handleChangeCate(item._id)"
         >
-          {{ cat.name }}
+          {{ languageStore.gt(item.name, item.en_name) }}
         </button>
       </div>
     </div>
 
-    <!-- 二级分类：单排，单选（显示选中父类的子类） -->
-    <div v-if="currentSubs.length" class="filter-section">
-      <h3>二级</h3>
-      <div class="row child-row">
-        <button :class="{ selected: activeSubId === '' && activeThirdId === '' }" @click="selectAllSub">全部</button>
+    <!--  二级分类  -->
+    <div v-if="activeCateId" class="filter-section">
+      <h3>{{ languageStore.gt('二级分类', 'Second Level') }}</h3>
+      <div class="row parent-row">
+        <button :class="{ selected: activeSubCateId === '' }" @click="selectAllSub">
+          {{ languageStore.gt('全部', 'ALL') }}
+        </button>
         <button
-          v-for="sub in currentSubs"
-          :key="sub._id"
-          :class="{ selected: activeSubId === sub._id }"
-          @click="selectSub(sub._id)"
+          v-for="item in categoryStore.subCateList"
+          :key="item._id"
+          :class="{ selected: activeSubCateId === String(item._id ?? '') }"
+          @click="handleChangeSubCate(item._id)"
         >
-          {{ sub.name }}
+          {{ languageStore.gt(item.name, item.en_name) }}
         </button>
       </div>
     </div>
 
-    <!-- 三级分类：单排，单选（基于当前二级） -->
-    <div v-if="currentThirds.length" class="filter-section">
-      <h3>三级</h3>
-      <div class="row third-row">
-        <button :class="{ selected: activeThirdId === '' }" @click="selectAllThird">全部</button>
+    <!--  三级分类  -->
+    <div v-if="activeSubCateId" class="filter-section">
+      <h3>{{ languageStore.gt('三级分类', 'Third Level') }}</h3>
+      <div class="row parent-row">
+        <button :class="{ selected: activeThirdCateId === '' }" @click="selectAllThird">
+          {{ languageStore.gt('全部', 'ALL') }}
+        </button>
         <button
-          v-for="t in currentThirds"
-          :key="t._id"
-          :class="{ selected: activeThirdId === t._id }"
-          @click="selectThird(t._id)"
+          v-for="item in categoryStore.thirdCateList"
+          :key="item._id"
+          :class="{ selected: activeThirdCateId === String(item._id ?? '') }"
+          @click="handleChangeThirdCate(item._id)"
         >
-          {{ t.name }}
+          {{ languageStore.gt(item.name, item.en_name) }}
         </button>
       </div>
     </div>
@@ -177,7 +135,6 @@ watch(
   background: transparent;
   border: 0;
   border-radius: 12px;
-  padding: 12px;
   margin-bottom: 12px; // 给下方标签/列表留空间
 }
 
@@ -204,14 +161,10 @@ watch(
 }
 
 /* 科技感分隔：使用柔和的品牌色发光边而非实体横线 */
-.filter-section + .filter-section {
-  padding-top: 8px;
-  margin-top: 4px;
-}
 .filter-section + .filter-section::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: -8px;
   left: 0;
   right: 0;
   height: 1px;

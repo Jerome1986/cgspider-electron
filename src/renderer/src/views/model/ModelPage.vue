@@ -1,26 +1,10 @@
 <script setup lang="ts">
 import CgsCategory from '@/components/CgsCategory.vue'
-import { Category } from '@/types/CateItem'
-import { categoryListGetApi } from '@/api/category'
-import { usePageTypeStore } from '@/stores'
-import { onMounted, ref } from 'vue'
-
-// 获取当前页面类型
-const pageTypeStore = usePageTypeStore()
-
-// 获取分类
-const cateList = ref<Category[]>([])
-const categoryListGet = async (pageType: string) => {
-  const res = await categoryListGetApi('材质')
-  cateList.value = Array.isArray(res.data) ? res.data : []
-}
-
-onMounted(() => categoryListGet(pageTypeStore.currentPageType))
 </script>
 
 <template>
   <div class="modelPage">
-    <CgsCategory :cate-list="cateList"></CgsCategory>
+    <CgsCategory></CgsCategory>
   </div>
 </template>
 

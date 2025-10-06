@@ -1,15 +1,15 @@
 <!--suppress ALL -->
 <script setup lang="ts">
-import { computed } from 'vue'
-import { MenuItem, menuList } from '@/config/menu'
+import { computed, onMounted } from 'vue'
+import { menuList } from '@/config/menu'
 import { useRouter } from 'vue-router'
 import CgsHeader from '@/components/CgsHeader.vue'
 import { useLanguageStore, usePageTypeStore } from '@/stores'
 
+// 定义store
 const pageTypeStore = usePageTypeStore()
 // 语言开关
 const languageStore = useLanguageStore()
-const isEN = computed(() => languageStore.languageSwitch)
 
 // 路由
 const router = useRouter()
@@ -21,7 +21,7 @@ const tabActiveIndex = computed(() => {
   return router.currentRoute.value.path
 })
 
-const getName = (it: MenuItem): string => (isEN.value ? (it.en_name ?? it.name) : it.name)
+onMounted(() => console.log('mounted', pageTypeStore.currentPageType, pageTypeStore.currentPagePath))
 </script>
 
 <template>
@@ -47,7 +47,7 @@ const getName = (it: MenuItem): string => (isEN.value ? (it.en_name ?? it.name) 
           style="font-size: 18px"
         />
         <!--   文字    -->
-        <div class="text">{{ getName(item) }}</div>
+        <div class="text">{{ languageStore.t(item) }}</div>
       </div>
     </el-aside>
     <el-container>

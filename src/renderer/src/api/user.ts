@@ -15,6 +15,7 @@ export const userIdInfoGetApi = (userId: string) => {
 }
 
 /**
+ * 会员到期
  * /vipEndTime
  * @param userId - 用户ID
  */

@@ -8,7 +8,9 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CgsAittribuleTag: typeof import('./src/components/CgsAittribuleTag.vue')['default']
     CgsCategory: typeof import('./src/components/CgsCategory.vue')['default']
+    CgsColorTag: typeof import('./src/components/CgsColorTag.vue')['default']
     CgsHeader: typeof import('./src/components/CgsHeader.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -20,8 +22,5 @@ declare module 'vue' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-  }
-  export interface GlobalDirectives {
-    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

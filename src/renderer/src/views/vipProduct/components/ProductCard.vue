@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ProductItem } from '@/types/ProductItem'
 import { useLanguageStore } from '@/stores'
-import { computed } from 'vue'
 import { Title } from '@/views/vipProduct/configData'
 
 const props = withDefaults(
@@ -25,23 +24,15 @@ function handleBuy(item: ProductItem): void {
 
 // 语言开关
 const languageStore = useLanguageStore()
-const isEN = computed(() => languageStore.languageSwitch)
-
-// 文本助手（优先英文，缺失则回退中文）
-const t = (cn: string, en: string): string => (isEN.value ? en : cn)
-const getTitle = (title: Title): string => (isEN.value ? (title.en_name ?? title.name) : title.name)
-const getItemName = (it: ProductItem): string => (isEN.value ? (it.en_name ?? it.productName) : it.productName)
-const getItemDesc = (it: ProductItem): string => (isEN.value ? (it.en_description ?? it.description) : it.description)
-const getItemType = (it: ProductItem): string => (isEN.value ? (it.en_productType ?? it.productType) : it.productType)
 </script>
 
 <template>
   <div class="product-section">
-    <div v-if="title" class="section-title">{{ getTitle(title) }}</div>
+    <div v-if="title" class="section-title">{{ languageStore.getTitle(title) }}</div>
     <div class="cards">
       <div v-for="item in props.productItem" :key="item._id" class="card" :class="{ featured: item.isActive }">
         <!-- 将标签移出 content，避免被 overflow 裁剪 -->
-        <div v-if="showFeatured && item.isActive" class="featured-tag">{{ t('超值', 'HOT') }}</div>
+        <div v-if="showFeatured && item.isActive" class="featured-tag">{{ languageStore.gt('超值', 'HOT') }}</div>
         <div class="card-content">
           <!-- 装饰背景 -->
           <div class="card-decor" aria-hidden="true" />
@@ -49,35 +40,35 @@ const getItemType = (it: ProductItem): string => (isEN.value ? (it.en_productTyp
           <!-- 头部：图标 + 标题 -->
           <div class="card-header">
             <i class="iconfont icon-jinbi"></i>
-            <span class="card-title">{{ getItemName(item) }}</span>
+            <span class="card-title">{{ languageStore.getItemName(item) }}</span>
           </div>
 
           <!-- 标签：类型/推荐 -->
           <div class="meta">
-            <span v-if="getItemType(item)" class="chip">{{ getItemType(item) }}</span>
-            <span v-if="item.isActive" class="chip positive">{{ t('推荐', 'Recommended') }}</span>
+            <span v-if="languageStore.getItemType(item)" class="chip">{{ languageStore.getItemType(item) }}</span>
+            <span v-if="item.isActive" class="chip positive">{{ languageStore.gt('推荐', 'Recommended') }}</span>
           </div>
 
           <!-- 价格排版 -->
           <div class="card-price">
             <span class="currency">¥</span>
             <span class="amount">{{ item.price }}</span>
-            <span class="unit">{{ t('起', 'from') }}</span>
+            <span class="unit">{{ languageStore.gt('起', 'from') }}</span>
           </div>
 
           <!-- 特性列表 -->
           <div class="card-features">
             <div v-if="item.productType === '金币充值'" class="feature-item">
-              <span class="highlight">{{ t('获得金币：', 'Coins:') }}</span>
-              <span class="text strong">{{ item.goldCoinsAmount }}{{ t('枚', ' coins') }}</span>
+              <span class="highlight">{{ languageStore.gt('获得金币：', 'Coins:') }}</span>
+              <span class="text strong">{{ item.goldCoinsAmount }}{{ languageStore.gt('枚', ' coins') }}</span>
             </div>
             <div v-if="item.productType === '购买会员'" class="feature-item">
-              <span class="highlight">{{ t('下载次数：', 'Times:') }}</span>
-              <span class="text strong">{{ item.dailyDownloadLimit }} {{ t('次', 'times') }}</span>
+              <span class="highlight">{{ languageStore.gt('下载次数：', 'Times:') }}</span>
+              <span class="text strong">{{ item.dailyDownloadLimit }} {{ languageStore.gt('次', 'times') }}</span>
             </div>
             <div class="feature-item">
-              <span class="highlight">{{ t('使用说明：', 'Usage:') }}</span>
-              <span class="text">{{ getItemDesc(item) }}</span>
+              <span class="highlight">{{ languageStore.gt('使用说明：', 'Usage:') }}</span>
+              <span class="text">{{ languageStore.getItemDesc(item) }}</span>
             </div>
           </div>
         </div>
@@ -85,9 +76,9 @@ const getItemType = (it: ProductItem): string => (isEN.value ? (it.en_productTyp
         <!-- 操作区 -->
         <div class="btn-wrapper">
           <el-button type="primary" class="buy-btn" @click="handleBuy(item)">{{
-            t('立即充值', 'Recharge now')
+            languageStore.gt('立即充值', 'Recharge now')
           }}</el-button>
-          <div class="cta-hint">{{ t('官方直充 · 到账更快', 'Official top-up · Faster arrival') }}</div>
+          <div class="cta-hint">{{ languageStore.gt('官方直充 · 到账更快', 'Official top-up · Faster arrival') }}</div>
         </div>
       </div>
     </div>

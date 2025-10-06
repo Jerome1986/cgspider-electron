@@ -9,12 +9,12 @@ export interface MenuItem {
 
 export const menuList: MenuItem[] = [
   {
-    id: 'model',
-    name: '模型',
-    en_name: 'model',
-    path: '/model',
-    icon: 'icon-bg-model',
-    activeIcon: 'icon-model'
+    id: 'material',
+    name: '材质',
+    en_name: 'material',
+    path: '/material',
+    icon: 'icon-caizhi',
+    activeIcon: 'icon-caizhi1'
   },
   {
     id: 'maps',
@@ -25,20 +25,20 @@ export const menuList: MenuItem[] = [
     activeIcon: 'icon-tietu2'
   },
   {
+    id: 'model',
+    name: '模型',
+    en_name: 'model',
+    path: '/model',
+    icon: 'icon-bg-model',
+    activeIcon: 'icon-model'
+  },
+  {
     id: 'lighting',
     name: '灯光',
     en_name: 'lighting',
     path: '/lighting',
     icon: 'icon-dengguang',
     activeIcon: 'icon-dengguang'
-  },
-  {
-    id: 'material',
-    name: '材质',
-    en_name: 'material',
-    path: '/material',
-    icon: 'icon-caizhi',
-    activeIcon: 'icon-caizhi1'
   },
   {
     id: 'vip',

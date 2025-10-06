@@ -25,12 +25,12 @@ const router = createRouter({
       path: '/',
       name: 'Source',
       component: () => import('@/views/layout/LayoutContainer.vue'),
-      redirect: '/model', // 进入/source时默认显示model
+      redirect: '/material', // 进入/source时默认显示model
       children: [
         {
-          path: '/model',
-          name: 'Model',
-          component: () => import('@/views/model/ModelPage.vue')
+          path: '/material',
+          name: 'Material',
+          component: () => import('@/views/material/MaterialPage.vue')
         },
         {
           path: '/maps',
@@ -38,15 +38,16 @@ const router = createRouter({
           component: () => import('@/views/maps/MapsPage.vue')
         },
         {
+          path: '/model',
+          name: 'Model',
+          component: () => import('@/views/model/ModelPage.vue')
+        },
+        {
           path: '/lighting',
           name: 'Lighting',
           component: () => import('@/views/lighting/LightingPage.vue')
         },
-        {
-          path: '/material',
-          name: 'Material',
-          component: () => import('@/views/material/MaterialPage.vue')
-        },
+
         // 会员产品页面
         {
           path: '/vipProduct',

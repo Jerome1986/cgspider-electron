@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import {
@@ -61,11 +61,6 @@ const handleMenuItem = (action: string) => {
   showMenu.value = false
 }
 
-// 语言开关
-const isEN = computed(() => languageStore.languageSwitch)
-// 文本助手（优先英文，缺失则回退中文）
-const t = (cn: string, en: string): string => (isEN.value ? en : cn)
-
 // 页面挂载完毕
 onMounted(async () => {
   const vipEndInfo = calcMembershipLeft(userStore.userInfo.membershipExpiry)
@@ -91,11 +86,11 @@ onMounted(async () => {
         <img :src="userStore.userInfo.userAvatarUrl" alt="头像" />
       </div>
       <!--   昵称   -->
-      <div class="username">{{ t('用户名', 'username') }}：{{ userStore.userInfo.username }}</div>
+      <div class="username">{{ languageStore.gt('用户名', 'username') }}：{{ userStore.userInfo.username }}</div>
       <!--   剩余金币   -->
-      <div class="gold">{{ t('金币', 'gold') }}：{{ userStore.userInfo.coins }}</div>
+      <div class="gold">{{ languageStore.gt('金币', 'gold') }}：{{ userStore.userInfo.coins }}</div>
       <!--   身份   -->
-      <div class="role">{{ t('身份', 'role') }}：{{ userStore.userInfo.role }}</div>
+      <div class="role">{{ languageStore.gt('身份', 'role') }}：{{ userStore.userInfo.role }}</div>
       <!--   切换语言   -->
       <el-switch
         v-model="languageSwitch"
@@ -106,10 +101,12 @@ onMounted(async () => {
         @change="handleChangeSwitch"
       />
       <!--  可下载次数  -->
-      <div class="downLimit">下载次数：{{ userStore.userInfo.dailyDownloadLimit }}</div>
+      <div class="downLimit">
+        {{ languageStore.gt('下载次数', 'downLimit') }}：{{ userStore.userInfo.dailyDownloadLimit }}
+      </div>
       <!-- 会员到期时间  -->
       <div v-if="userStore.userInfo.role === 'vip'" class="vipEndTime">
-        {{ t('会员到期时间', 'endTime') }}：{{ formatTimestamp(userStore.userInfo.membershipExpiry!) }}
+        {{ languageStore.gt('会员到期时间', 'endTime') }}：{{ formatTimestamp(userStore.userInfo.membershipExpiry!) }}
       </div>
     </div>
 

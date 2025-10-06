@@ -6,10 +6,10 @@ export const usePageTypeStore = defineStore(
   'pageType',
   () => {
     // 当前页面类型
-    const currentPageType = ref(menuList[0].name)
-    console.log(menuList[0].name)
+    const currentPageType = ref('')
+
     // 当前页面路径
-    const currentPagePath = ref(menuList[0].path)
+    const currentPagePath = ref('')
 
     // 设置当前页面类型
     const setCurrentPageType = (path: string) => {
@@ -27,7 +27,7 @@ export const usePageTypeStore = defineStore(
           currentPageType.value = '材质'
           break
         default:
-          currentPageType.value = ''
+          currentPageType.value = menuList[0].name
           break
       }
     }
@@ -38,9 +38,9 @@ export const usePageTypeStore = defineStore(
 
     return {
       currentPageType,
+      setCurrentPageType,
       currentPagePath,
-      setCurrentPagePath,
-      setCurrentPageType
+      setCurrentPagePath
     }
   },
   {
