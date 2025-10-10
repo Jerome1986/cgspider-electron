@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { useUserStore } from '@/stores'
 
 // createRouter 创建路由实例，===> new VueRouter()
@@ -12,7 +12,7 @@ import { useUserStore } from '@/stores'
 // vite.config.ts  添加配置  base: my-path，路由这就会加上 my-path 前缀了
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/login',

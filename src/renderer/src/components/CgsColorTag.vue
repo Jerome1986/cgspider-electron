@@ -1,17 +1,32 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useLanguageStore, usePageTypeStore } from '@/stores'
+import { useCategoryStore, useLanguageStore, useMaterialStore, usePageTypeStore, useUserStore } from '@/stores'
 import { useTagStore } from '@/stores/modules/tags'
 
 // 定义store
 const pageTypeStore = usePageTypeStore()
+const categoryStore = useCategoryStore()
 const tagStore = useTagStore()
+const materialStore = useMaterialStore()
+const userStore = useUserStore()
 const languageStore = useLanguageStore()
 
-// 处理标签切换点击
-const handleChangeColorTag = (tagId: string) => {
-  console.log(tagId)
-  tagStore.setColorTag(tagId)
+// 处理颜色标签切换点击
+const handleChangeColorTag = async (colorTagId: string) => {
+  console.log(colorTagId, tagStore.selectedColorIds)
+  tagStore.setColorTag(colorTagId)
+  // 渲染素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    false,
+    false,
+    userStore.userInfo._id
+  )
 }
 
 onMounted(async () => {

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog } from 'electron'
+import { BrowserWindow, dialog } from 'electron'
 
 // 控制窗口状态 --最小化 --最大化 --关闭窗口
 export const changeWindow = (val: string, mainWindow: BrowserWindow) => {
@@ -14,7 +14,7 @@ export const changeWindow = (val: string, mainWindow: BrowserWindow) => {
       break
     case 'close':
       console.log('程序退出')
-      app.quit()
+      mainWindow.close()
       break
   }
 }

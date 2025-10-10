@@ -1,61 +1,147 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useCategoryStore, useLanguageStore, usePageTypeStore } from '@/stores'
+import {
+  useCategoryStore,
+  useLanguageStore,
+  useMaterialStore,
+  usePageTypeStore,
+  useTagStore,
+  useUserStore
+} from '@/stores'
 
 // 定义store
 const pageTypeStore = usePageTypeStore()
 const categoryStore = useCategoryStore()
+const tagStore = useTagStore()
+const materialStore = useMaterialStore()
+const userStore = useUserStore()
 const languageStore = useLanguageStore()
 
+const isDown = ref(false)
+const isLove = ref(false)
+
 // 一级分类
-const activeCateId = ref('')
-const selectAllCate = () => {
+const selectAllCate = async () => {
   console.log('全部')
-  activeCateId.value = ''
-  activeSubCateId.value = ''
-  activeThirdCateId.value = ''
+  categoryStore.setCurrentCateId('')
+  categoryStore.setCurrentSubCateId('')
+  categoryStore.setCurrentThirdCateId('')
+  // 渲染素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    isDown.value,
+    isLove.value,
+    userStore.userInfo._id
+  )
 }
 
 // 一级分类发生改变时
 const handleChangeCate = async (cateId: string) => {
   console.log(cateId)
   // 重置二级分类
-  activeSubCateId.value = ''
-  activeThirdCateId.value = ''
+  categoryStore.setCurrentSubCateId('')
+  categoryStore.setCurrentThirdCateId('')
 
+  // 存入当前的一级分类ID
+  categoryStore.setCurrentCateId(cateId)
   // 根据一级分类渲染二级分类
-  activeCateId.value = cateId
   await categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 2)
+
+  // 渲染素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    isDown.value,
+    isLove.value,
+    userStore.userInfo._id
+  )
 }
 
 // 二级分类点击全部
-const activeSubCateId = ref('')
-const selectAllSub = () => {
-  activeSubCateId.value = ''
-  activeThirdCateId.value = ''
+const selectAllSub = async () => {
+  categoryStore.setCurrentSubCateId('')
+  categoryStore.setCurrentThirdCateId('')
+  // 渲染素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    isDown.value,
+    isLove.value,
+    userStore.userInfo._id
+  )
 }
 
 // 二级分类发生改变时
 const handleChangeSubCate = async (cateId: string) => {
   console.log(cateId)
   // 重置三级分类ID
-  activeThirdCateId.value = ''
+  categoryStore.setCurrentThirdCateId('')
 
+  // 存入当前的二级分类ID
+  categoryStore.setCurrentSubCateId(cateId)
   // 根据二级分类ID获取三级分类
-  activeSubCateId.value = cateId
   await categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 3)
+  // 获取对应素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    isDown.value,
+    isLove.value,
+    userStore.userInfo._id
+  )
 }
 
-// 三级分类
-const activeThirdCateId = ref('')
-const selectAllThird = () => {
-  activeThirdCateId.value = ''
+// 三级分类全部
+const selectAllThird = async () => {
+  categoryStore.setCurrentThirdCateId('')
+  // 渲染素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    isDown.value,
+    isLove.value,
+    userStore.userInfo._id
+  )
 }
 
 // 三级分类改变时
-const handleChangeThirdCate = (cateId: string) => {
+const handleChangeThirdCate = async (cateId: string) => {
   console.log(cateId)
-  activeThirdCateId.value = cateId
+  // 存入当前的三级分类ID
+  categoryStore.setCurrentThirdCateId(cateId)
+  // 获取对应素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    isDown.value,
+    isLove.value,
+    userStore.userInfo._id
+  )
 }
 
 onMounted(async () => {
@@ -70,13 +156,13 @@ onMounted(async () => {
     <div class="filter-section">
       <h3>{{ languageStore.gt('一级分类', 'Top Level') }}</h3>
       <div class="row parent-row">
-        <button :class="{ selected: activeCateId === '' }" @click="selectAllCate">
+        <button :class="{ selected: categoryStore.currentCateId === '' }" @click="selectAllCate">
           {{ languageStore.gt('全部', 'ALL') }}
         </button>
         <button
           v-for="item in categoryStore.cateList"
           :key="item._id"
-          :class="{ selected: activeCateId === String(item._id ?? '') }"
+          :class="{ selected: categoryStore.currentCateId === String(item._id ?? '') }"
           @click="handleChangeCate(item._id)"
         >
           {{ languageStore.gt(item.name, item.en_name) }}
@@ -85,16 +171,16 @@ onMounted(async () => {
     </div>
 
     <!--  二级分类  -->
-    <div v-if="activeCateId" class="filter-section">
+    <div v-if="categoryStore.currentCateId" class="filter-section">
       <h3>{{ languageStore.gt('二级分类', 'Second Level') }}</h3>
       <div class="row parent-row">
-        <button :class="{ selected: activeSubCateId === '' }" @click="selectAllSub">
+        <button :class="{ selected: categoryStore.currentSubCateId === '' }" @click="selectAllSub">
           {{ languageStore.gt('全部', 'ALL') }}
         </button>
         <button
           v-for="item in categoryStore.subCateList"
           :key="item._id"
-          :class="{ selected: activeSubCateId === String(item._id ?? '') }"
+          :class="{ selected: categoryStore.currentSubCateId === String(item._id ?? '') }"
           @click="handleChangeSubCate(item._id)"
         >
           {{ languageStore.gt(item.name, item.en_name) }}
@@ -103,16 +189,16 @@ onMounted(async () => {
     </div>
 
     <!--  三级分类  -->
-    <div v-if="activeSubCateId" class="filter-section">
+    <div v-if="categoryStore.currentSubCateId" class="filter-section">
       <h3>{{ languageStore.gt('三级分类', 'Third Level') }}</h3>
       <div class="row parent-row">
-        <button :class="{ selected: activeThirdCateId === '' }" @click="selectAllThird">
+        <button :class="{ selected: categoryStore.currentThirdCateId === '' }" @click="selectAllThird">
           {{ languageStore.gt('全部', 'ALL') }}
         </button>
         <button
           v-for="item in categoryStore.thirdCateList"
           :key="item._id"
-          :class="{ selected: activeThirdCateId === String(item._id ?? '') }"
+          :class="{ selected: categoryStore.currentThirdCateId === String(item._id ?? '') }"
           @click="handleChangeThirdCate(item._id)"
         >
           {{ languageStore.gt(item.name, item.en_name) }}

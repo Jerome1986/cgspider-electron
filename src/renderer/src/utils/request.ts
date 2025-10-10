@@ -33,7 +33,7 @@ function getErrorMessage(error: unknown): string {
   // if (error instanceof Error) {
   //   return error.message
   // }
-  // return '服务异常'
+  return '服务异常'
 }
 
 // 请求函数
@@ -47,7 +47,7 @@ export const request = async <T>(options: AxiosRequestConfig): Promise<Data<T>> 
     headers: {
       ...(options.headers || {}),
       'source-client': 'admin-web',
-      ...(userStore.token ? { Authorization: userStore.token } : {})
+      ...(userStore.userInfo.token ? { Authorization: userStore.userInfo.token } : {})
     },
     validateStatus: () => true // axios 不拦截，交给我们自己处理
   }

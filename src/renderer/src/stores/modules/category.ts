@@ -7,6 +7,13 @@ import { Category } from '@/types/CateItem'
 export const useCategoryStore = defineStore(
   'category',
   () => {
+    // 当前选择的分类ID
+    const currentCateId = ref('') // 一级分类ID
+    const currentSubCateId = ref('') // 二级分类ID
+    const currentThirdCateId = ref('') // 三级分类ID
+    const setCurrentCateId = (id: string) => (currentCateId.value = id)
+    const setCurrentSubCateId = (id: string) => (currentSubCateId.value = id)
+    const setCurrentThirdCateId = (id: string) => (currentThirdCateId.value = id)
     // 分类列表
     const cateList = ref<Category[]>([]) //一级分类
     const subCateList = ref<Category[]>([]) //二级分类
@@ -39,7 +46,13 @@ export const useCategoryStore = defineStore(
       cateList,
       subCateList,
       thirdCateList,
-      categoryListGet
+      categoryListGet,
+      currentCateId,
+      currentSubCateId,
+      currentThirdCateId,
+      setCurrentCateId,
+      setCurrentSubCateId,
+      setCurrentThirdCateId
     }
   },
   {

@@ -5,9 +5,11 @@ import icon from '../../resources/icon.png?asset'
 import { changeWindow, quitWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
 import { openPaymentWindow } from '@main/window/payWindow'
 
+let mainWindow: BrowserWindow | null = null
+
 function createWindow(): void {
   // 创建浏览器窗口。
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     minWidth: 1050,
     minHeight: 860,
     show: false,
@@ -23,34 +25,39 @@ function createWindow(): void {
 
   // 处理窗口鼠标按住移动---拖拽效果
   ipcMain.handle('custom-adsorption', (_, res) => {
-    mainWindow.setPosition(res.appX, res.appY)
+    mainWindow?.setPosition(res.appX, res.appY)
   })
 
   // 登录页面处理退出
   ipcMain.handle('quit', async () => {
-    const result = await quitWindow(mainWindow)
+    const result = await quitWindow(mainWindow!)
     if (result.response === 1) {
       app.quit()
+      mainWindow = null
     }
   })
 
   // 处理窗口缩小放大和关闭
-  ipcMain.handle('change-window', (_, val) => changeWindow(val, mainWindow))
+  ipcMain.handle('change-window', (_, val) => changeWindow(val, mainWindow!))
 
   // 处理窗口置顶
   ipcMain.handle('toggle-on-top', (_, isOnTop) => toggleOnTop(isOnTop))
 
   // 添加选择文件夹处理
-  ipcMain.handle('select-download-path', () => selectDownloadPath(mainWindow))
+  ipcMain.handle('select-download-path', () => selectDownloadPath(mainWindow!))
 
   // 创建支付订单窗口
   ipcMain.handle('creatOrder', (_, payUrl) => {
-    openPaymentWindow(payUrl, mainWindow)
+    openPaymentWindow(payUrl, mainWindow!)
   })
 
   // 显示主窗口
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow?.show()
+  })
+
+  mainWindow.on('closed', () => {
+    mainWindow = null
   })
 
   // 外部链接处理-- action: 'deny'   点击链接通过浏览器打开，而不是通过electron打开
@@ -86,10 +93,12 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  app.on('activate', function () {
-    // 在 macOS 上，当点击 Dock 图标且没有其他窗口打开时
-    // 通常会在应用内重新创建一个窗口。
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  app.on('activate', () => {
+    if (mainWindow) {
+      mainWindow.show()
+    } else {
+      createWindow()
+    }
   })
 })
 

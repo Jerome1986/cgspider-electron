@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { TagAittribuleItem, TagColorItem } from '@/types/Tags'
 import { attributeTagGetApi, colorTagGetApi } from '@/api/tag'
 
@@ -26,6 +26,11 @@ export const useTagStore = defineStore(
       })
     }
 
+    // 所有已选的属性标签的ID集合
+    const selectedAittribuleIds = computed(() => {
+      return selectedAittribuleTag.value.map((item) => item._id)
+    })
+
     /**
      * ----------------------------------  颜色标签 ------------------------------
      */
@@ -49,15 +54,22 @@ export const useTagStore = defineStore(
       })
     }
 
+    // 所有已选的属性标签的ID集合
+    const selectedColorIds = computed(() => {
+      return selectedColorTag.value.map((item) => item.color)
+    })
+
     return {
       aittributeTag,
       aittribuleTagGet,
       setAittributeTag,
       selectedAittribuleTag,
+      selectedAittribuleIds,
       colorList,
       getColorTagList,
       selectedColorTag,
-      setColorTag
+      setColorTag,
+      selectedColorIds
     }
   },
   {
