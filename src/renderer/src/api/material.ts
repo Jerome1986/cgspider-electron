@@ -1,5 +1,6 @@
 import { request } from '@/utils/request'
-import { MaterialLoveResult, MaterialPageResult } from '@/types/Material'
+import { MaterialDownLoad, MaterialLoveResult, MaterialPageResult } from '@/types/Material'
+import { addResult } from '@/types/Global '
 
 /**
  * 综合筛选素材
@@ -71,5 +72,53 @@ export const materialListLoveGetApi = (user_id: string) => {
     method: 'GET',
     url: '/user-loveList-get',
     params: { user_id }
+  })
+}
+
+/**
+ * 根据关键词搜索素材
+ * /material-searchWeb
+ * @param pagesType - 页面类型
+ * @param searchVal - 搜索值
+ * @param pageNum - 页码
+ * @param pageSize - 条数
+ */
+export const materialListSearchKeywordsApi = (
+  pagesType: string,
+  searchVal: string,
+  pageNum: number = 1,
+  pageSize: number = 10
+) => {
+  return request<MaterialPageResult>({
+    method: 'POST',
+    url: '/material-searchWeb',
+    data: { pagesType, searchVal, pageNum, pageSize }
+  })
+}
+
+/**
+ * 获取用户的下载列表
+ * @param user_id
+ */
+export const materialDownLoadListApiGet = (user_id: string) => {
+  return request<MaterialDownLoad[]>({
+    method: 'GET',
+    url: '/user-downloadList-get',
+    params: { user_id }
+  })
+}
+
+/**
+ * 添加到下载列表
+ * /user-add-download
+ * @param user_id - 用户ID
+ * @param material_id - 素材ID
+ * @param file_path - 当前素材本地保存路径
+ */
+export const materialDownLoadListApiAdd = (user_id: string, material_id: string, file_path: string) => {
+  return request<addResult>({
+    method: 'POST',
+    url: '/user-add-download',
+    data: { user_id, material_id, file_path }
   })
 }

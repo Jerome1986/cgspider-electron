@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { changeWindow, quitWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
+import { changeWindow, DownloadPayload, handleDownload, quitWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
 import { openPaymentWindow } from '@main/window/payWindow'
 
 let mainWindow: BrowserWindow | null = null
@@ -49,6 +49,13 @@ function createWindow(): void {
   // 创建支付订单窗口
   ipcMain.handle('creatOrder', (_, payUrl) => {
     openPaymentWindow(payUrl, mainWindow!)
+  })
+
+  // 处理下载
+  ipcMain.handle('download-file', async (_, payload: DownloadPayload) => {
+    // getFocusedWindow 为获取当前正在操作的焦点窗口
+    const win = BrowserWindow.getFocusedWindow() || mainWindow
+    return handleDownload(win!, payload)
   })
 
   // 显示主窗口

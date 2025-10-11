@@ -45,7 +45,22 @@ export interface MaterialPageResult {
 
 // 素材收藏返回类型
 export interface MaterialLoveResult {
+  /** 唯一标识 */
   _id: string
+  /** 用户ID */
   user_id: string
+  /** 对应素材ID */
   material_id: string
+}
+
+// 素材下载列表类型
+export interface MaterialDownLoad {
+  /** 唯一标识 */
+  _id: string
+  /** 用户ID */
+  user_id: string
+  /** 对应素材ID */
+  material_id: string
+  /** 用户对应下载素材本地的保存路径--用于后期点击直接打开文件 */
+  file_path: string
 }

@@ -29,7 +29,9 @@ onMounted(async () => {
       userStore.userInfo._id
     ),
     //   获取收藏列表
-    materialStore.materialLoveListGet(userStore.userInfo._id)
+    materialStore.materialLoveListGet(userStore.userInfo._id),
+    // 获取下载列表
+    materialStore.downLoadListGet(userStore.userInfo._id)
   ])
 })
 </script>

@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { MaterialItem, MaterialLoveResult } from '@/types/Material'
-import { materialListGetApi, materialListLoveGetApi } from '@/api/material'
+import { MaterialDownLoad, MaterialItem, MaterialLoveResult } from '@/types/Material'
+import {
+  materialDownLoadListApiGet,
+  materialListGetApi,
+  materialListLoveGetApi,
+  materialListSearchKeywordsApi
+} from '@/api/material'
 
 export const useMaterialStore = defineStore(
   'material',
@@ -44,8 +49,8 @@ export const useMaterialStore = defineStore(
           pageNum.value,
           pageSize.value
         )
-        console.log('素材', res.data)
-        materialList.value = res.data.list.map((item) => ({ ...item, isDownloaded: true, isLoved: true }))
+        materialList.value = res.data.list
+        console.log('素材', materialList.value)
         materialTotal.value = res.data.total
       } catch (error) {
         console.error(error)
@@ -77,8 +82,74 @@ export const useMaterialStore = defineStore(
       if (!materialLoveList.value?.length) return true
 
       const love = materialLoveList.value.some((item) => item.material_id === materialId)
-      console.log('是否收藏', love)
+      // console.log('是否收藏', love)
       return !love
+    }
+
+    // 获取下载列表
+    const downLoadList = ref<MaterialDownLoad[]>([])
+    const downLoadListGet = async (userId: string) => {
+      const res = await materialDownLoadListApiGet(userId)
+      downLoadList.value = res.data
+    }
+
+    // 前端是否显示下载的UI状态函数
+    const isDownloaded = (materialId: string): boolean => {
+      if (!downLoadList.value?.length) return false
+      // console.log('是否下载', downLoad)
+      return downLoadList.value.some((item) => item.material_id === materialId)
+    }
+
+    // 显示下载进度UI
+    /**
+     * 存储每个素材的下载进度百分比
+     * key: 素材ID (materialId)
+     * value: 下载进度百分比 (0-100)
+     */
+    const downloadPctMap = ref<Record<string, number>>({})
+
+    /**
+     * 设置指定素材的下载进度
+     * @param id 素材ID
+     * @param received 已接收的字节数
+     * @param total 总字节数
+     * @returns 如果total为0，返回0；否则返回undefined
+     */
+    const setDownloadProgress = (id: string, received: number, total: number): number | void => {
+      if (!total) return (downloadPctMap.value[id] = 0)
+      downloadPctMap.value[id] = Math.min(100, Math.round((received / total) * 100))
+    }
+
+    /**
+     * 清除指定素材的下载进度
+     * @param id 素材ID
+     */
+    const clearDownloadProgress = (id: string) => {
+      delete downloadPctMap.value[id]
+    }
+
+    /**
+     * 获取指定素材的下载进度百分比
+     * @param id 素材ID
+     * @returns 下载进度百分比，如果不存在则返回0
+     */
+    const getPct = (id: string) => downloadPctMap.value[id] ?? 0
+
+    /**
+     * 判断是否显示指定素材的下载进度UI
+     * @param id 素材ID
+     * @returns 当进度大于0且小于100时返回true，表示下载中
+     */
+    const isDownShow = (id: string) => {
+      const pct = downloadPctMap.value[id]
+      return pct > 0 && pct < 100
+    }
+
+    // 根据关键词搜索素材
+    const searchKeywords = async (pageType: string, searchValue: string) => {
+      const res = await materialListSearchKeywordsApi(pageType, searchValue, pageNum.value, pageSize.value)
+      materialList.value = res.data.list
+      materialTotal.value = res.data.total
     }
 
     return {
@@ -95,7 +166,15 @@ export const useMaterialStore = defineStore(
       isLove,
       filterLove,
       setFilterLove,
-      showText
+      downLoadList,
+      downLoadListGet,
+      isDownloaded,
+      setDownloadProgress,
+      clearDownloadProgress,
+      getPct,
+      isDownShow,
+      showText,
+      searchKeywords
     }
   },
   {

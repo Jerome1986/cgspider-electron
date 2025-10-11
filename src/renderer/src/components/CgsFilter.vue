@@ -11,10 +11,13 @@ const tagStore = useTagStore()
 const materialStore = useMaterialStore()
 const userStore = useUserStore()
 
-// 处理分页
+// 处理分页--每页条数
 const handleSizeChange = async (size: number) => {
   materialStore.setPageSize(size)
   materialStore.setPageNum(1)
+  searchValue.value = ''
+  isSearch.value = false
+
   // 渲染数据
   await materialStore.materialListFilterGet(
     pageTypeStore.currentPageType,
@@ -29,30 +32,57 @@ const handleSizeChange = async (size: number) => {
   )
 }
 
+// 处理翻页
 const handleCurrentChange = async (current: number) => {
   materialStore.setPageNum(current)
-  // 渲染数据
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    false,
-    false,
-    userStore.userInfo._id
-  )
+  // 如果搜索存在--优先根据搜索内容
+  if (isSearch.value) {
+    await materialStore.searchKeywords(pageTypeStore.currentPageType, searchValue.value)
+  } else {
+    // 渲染数据
+    await materialStore.materialListFilterGet(
+      pageTypeStore.currentPageType,
+      categoryStore.currentCateId,
+      categoryStore.currentSubCateId,
+      categoryStore.currentThirdCateId,
+      tagStore.selectedAittribuleIds,
+      tagStore.selectedColorIds,
+      false,
+      false,
+      userStore.userInfo._id
+    )
+  }
 }
 
 // 处理搜索
 const searchValue = ref('')
-const handleClear = () => {
+// 清空搜索
+const handleClear = async () => {
   searchValue.value = ''
-  console.log('清空搜索')
+  isSearch.value = false
+  materialStore.setPageNum(1)
+  // 渲染素材
+  await materialStore.materialListFilterGet(
+    pageTypeStore.currentPageType,
+    categoryStore.currentCateId,
+    categoryStore.currentSubCateId,
+    categoryStore.currentThirdCateId,
+    tagStore.selectedAittribuleIds,
+    tagStore.selectedColorIds,
+    false,
+    false,
+    userStore.userInfo._id
+  )
 }
-const searchGetMaterial = () => {
+
+// 点击查询--搜索
+const isSearch = ref(false) // 记录搜索状态
+const searchGetMaterial = async () => {
   console.log('查询', searchValue.value)
+  isSearch.value = true
+  // 搜索之前重置页码
+  materialStore.setPageNum(1)
+  await materialStore.searchKeywords(pageTypeStore.currentPageType, searchValue.value)
 }
 
 // 处理筛选
@@ -63,6 +93,11 @@ const changeFilter = async (value: CheckboxValueType[]) => {
 
   // 重置页码再筛选
   materialStore.setPageNum(1)
+
+  // 重置搜索
+  searchValue.value = ''
+  isSearch.value = false
+
   // 渲染素材
   await materialStore.materialListFilterGet(
     pageTypeStore.currentPageType,
@@ -122,6 +157,7 @@ const resetFilter = async () => {
         :prefix-icon="Search"
         clearable
         @clear="handleClear"
+        @keydown.enter="searchGetMaterial"
       />
       <div class="searchBtn" @click="searchGetMaterial">查询</div>
     </div>

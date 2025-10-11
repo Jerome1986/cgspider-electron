@@ -1,25 +1,47 @@
 <script setup lang="ts">
-import { useMaterialStore, useUserStore } from '@/stores'
-import { onMounted, ref } from 'vue'
+import { useMaterialStore, usePageTypeStore, usePathStore, useUserStore } from '@/stores'
+import { onMounted } from 'vue'
 import { handleWheel, itemSize } from '@/utils/Wheel'
 import SkeletonSourceMaterial from '@/components/SkeletonSourceMaterial.vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { MaterialItem } from '@/types/Material'
 import { materialListLoveApi } from '@/api/material'
+import { useClipboard } from '@vueuse/core'
+import { onDone, onProgress } from '@/utils/download'
+
+// 复制文本
+const { copy, copied } = useClipboard()
+const handleCopyName = async (name: string) => {
+  await copy(name)
+  copied ? ElMessage.success('复制成功') : ElMessage.error('复制失败')
+}
 
 // 定义store
 const materialStore = useMaterialStore()
 const userStore = useUserStore()
+const pathStore = usePathStore()
+const pageTypeStore = usePageTypeStore()
 
 // 获取当前路由对象
 const route = useRoute()
 
-// 测试数据
-const isDown = ref(false)
 // 处理下载
-const handleDownload = (item: MaterialItem) => {
+const handleDownload = async (item: MaterialItem) => {
   console.log(item)
+  const saveDir = pathStore.downloadPath // 确保这是一个目录
+  const subDirs = [pageTypeStore.currentPageType, item.name]
+  const url = item.files_url
+  const materialId = item._id
+  // 3) 发起主进程下载（注意 Windows 反斜杠问题交由主进程处理，无需手动替换）
+  const fileName = `${item.name}` // 可带扩展名，或让主进程用服务器文件名
+  const res = await window.electron.ipcRenderer.invoke('download-file', { url, fileName, saveDir, subDirs, materialId })
+  console.log(res)
+  if (!res?.ok) {
+    ElMessage.error('下载启动失败')
+    return
+  }
+  ElMessage.success('开始下载')
 }
 
 // 处理素材功能
@@ -50,8 +72,20 @@ const handleFunction = async (value: string, materialId: string) => {
   }
 }
 
+const colors = [
+  { color: '#f56c6c', percentage: 20 },
+  { color: '#e6a23c', percentage: 40 },
+  { color: '#5cb87a', percentage: 60 },
+  { color: '#1989fa', percentage: 80 },
+  { color: '#6f7ad3', percentage: 100 }
+]
+
 onMounted(() => {
+  // 通过滚轮动态控制尺寸
   document.addEventListener('wheel', handleWheel, { passive: false })
+  // 监听下载进度
+  window.electron.ipcRenderer.on('download-progress', onProgress)
+  window.electron.ipcRenderer.on('download-done', onDone)
 })
 </script>
 <template>
@@ -80,7 +114,7 @@ onMounted(() => {
         <i
           class="iconfont icon-xiazaichenggong"
           style="font-size: 20px; opacity: 0"
-          :style="{ opacity: isDown ? 100 : 0 }"
+          :style="{ opacity: materialStore.isDownloaded(item._id) ? 100 : 0 }"
         ></i>
         <i
           class="iconfont icon-xiazai_xiazai hover-visible"
@@ -88,10 +122,23 @@ onMounted(() => {
           @click="handleDownload(item)"
         ></i>
       </div>
+      <!-- 下载进度  -->
+      <div v-if="materialStore.isDownShow(item._id)" class="progress-container">
+        <div class="progress-mask"></div>
+        <div class="progress">
+          <el-progress
+            type="dashboard"
+            :percentage="materialStore.getPct(item._id)"
+            :color="colors"
+            :stroke-width="6"
+            class="white-percentage"
+          />
+        </div>
+      </div>
       <!--   素材信息和功能区   -->
       <div class="InfoFunction" @click.stop>
         <!--   素材名字    -->
-        <div v-if="materialStore.showText" class="name">
+        <div v-if="materialStore.showText" class="name" @click="handleCopyName(item.name)">
           {{ item.name }}
         </div>
         <!--  名字占位  -->
@@ -201,6 +248,48 @@ onMounted(() => {
       width: 100%;
     }
 
+    .progress-container {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 999;
+
+      .progress-mask {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(2px);
+      }
+
+      .progress {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+
+        ::v-deep(.el-progress__text) {
+          color: white !important;
+          font-weight: bold;
+          font-size: 14px !important;
+        }
+
+        ::v-deep(.white-percentage) {
+          .el-progress__text {
+            color: white !important;
+          }
+        }
+      }
+    }
+
     /*素材信息和功能*/
     .InfoFunction {
       position: absolute;
@@ -217,6 +306,7 @@ onMounted(() => {
 
       .name {
         max-width: 200px;
+        cursor: pointer;
         @include ellipsis(1);
       }
 
