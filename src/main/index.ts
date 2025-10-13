@@ -53,9 +53,15 @@ function createWindow(): void {
 
   // 处理下载
   ipcMain.handle('download-file', async (_, payload: DownloadPayload) => {
+    console.log('开始下载')
     // getFocusedWindow 为获取当前正在操作的焦点窗口
     const win = BrowserWindow.getFocusedWindow() || mainWindow
     return handleDownload(win!, payload)
+  })
+
+  // 打开在本地已下载的文件夹
+  ipcMain.handle('show-file', async (_, filePath: string) => {
+    shell.showItemInFolder(filePath)
   })
 
   // 显示主窗口

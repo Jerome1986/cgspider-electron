@@ -26,8 +26,8 @@ const handleSizeChange = async (size: number) => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    false,
-    false,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -47,8 +47,8 @@ const handleCurrentChange = async (current: number) => {
       categoryStore.currentThirdCateId,
       tagStore.selectedAittribuleIds,
       tagStore.selectedColorIds,
-      false,
-      false,
+      materialStore.download,
+      materialStore.collect,
       userStore.userInfo._id
     )
   }
@@ -69,8 +69,8 @@ const handleClear = async () => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    false,
-    false,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -88,8 +88,8 @@ const searchGetMaterial = async () => {
 // 处理筛选
 const checkListFilter = ref([])
 const changeFilter = async (value: CheckboxValueType[]) => {
-  const collect = value.includes('collect')
-  const download = value.includes('download')
+  materialStore.setCollect(value.includes('collect'))
+  materialStore.setDownload(value.includes('download'))
 
   // 重置页码再筛选
   materialStore.setPageNum(1)
@@ -106,8 +106,8 @@ const changeFilter = async (value: CheckboxValueType[]) => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    download,
-    collect,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -141,7 +141,8 @@ const resetFilter = async () => {
         v-model:current-page="materialStore.pageNum"
         v-model:page-size="materialStore.pageSize"
         background
-        :page-sizes="[1, 10, 50, 80, 100]"
+        size="small"
+        :page-sizes="[10, 50, 80, 100]"
         layout="total, sizes, prev, pager, next"
         :total="materialStore.materialTotal"
         @size-change="handleSizeChange"
@@ -249,7 +250,7 @@ const resetFilter = async () => {
 
     /*搜索框*/
     .custom-input {
-      width: 100%;
+      min-width: 100px;
       flex: 1;
 
       :deep(.el-input__wrapper) {
@@ -267,6 +268,7 @@ const resetFilter = async () => {
 
     /*搜索按钮*/
     .searchBtn {
+      width: 30px;
       margin-left: 8px;
       cursor: pointer;
 

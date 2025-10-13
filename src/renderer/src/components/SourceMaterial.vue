@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMaterialStore, usePageTypeStore, usePathStore, useUserStore } from '@/stores'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { handleWheel, itemSize } from '@/utils/Wheel'
 import SkeletonSourceMaterial from '@/components/SkeletonSourceMaterial.vue'
 import { useRoute } from 'vue-router'
@@ -9,6 +9,7 @@ import { MaterialItem } from '@/types/Material'
 import { materialListLoveApi } from '@/api/material'
 import { useClipboard } from '@vueuse/core'
 import { onDone, onProgress } from '@/utils/download'
+import CustomImagePreview from '@/components/CustomImagePreview.vue'
 
 // 复制文本
 const { copy, copied } = useClipboard()
@@ -30,6 +31,11 @@ const route = useRoute()
 const handleDownload = async (item: MaterialItem) => {
   console.log(item)
   const saveDir = pathStore.downloadPath // 确保这是一个目录
+  console.log('下载路径', pathStore.downloadPath)
+  if (!saveDir || saveDir === '未设置') {
+    ElMessage.error('请先设置下载路径')
+    return
+  }
   const subDirs = [pageTypeStore.currentPageType, item.name]
   const url = item.files_url
   const materialId = item._id
@@ -55,9 +61,16 @@ const handleFunction = async (value: string, materialId: string) => {
     case 'full':
       console.log('平铺')
       break
-    case 'openFile':
+    case 'openFile': {
       console.log('打开文件夹')
+      const filePath = materialStore.downLoadFilePathGet(materialId)
+      if (filePath) {
+        window.electron.ipcRenderer.invoke('show-file', filePath)
+      } else {
+        ElMessage.warning('本地找不到该文件')
+      }
       break
+    }
     case 'love': {
       console.log('收藏')
       const loveRes = await materialListLoveApi(userStore.userInfo._id, materialId)
@@ -72,6 +85,7 @@ const handleFunction = async (value: string, materialId: string) => {
   }
 }
 
+// 根据下载进度变色
 const colors = [
   { color: '#f56c6c', percentage: 20 },
   { color: '#e6a23c', percentage: 40 },
@@ -79,6 +93,16 @@ const colors = [
   { color: '#1989fa', percentage: 80 },
   { color: '#6f7ad3', percentage: 100 }
 ]
+
+// 预览控制
+const previewVisible = ref(false)
+
+// 处理预览
+const previewUrl = ref('')
+const handleView = (url: string) => {
+  previewVisible.value = true
+  previewUrl.value = url
+}
 
 onMounted(() => {
   // 通过滚轮动态控制尺寸
@@ -108,6 +132,7 @@ onMounted(() => {
         fit="cover"
         hide-on-click-modal
         :style="{ width: `${itemSize}px`, height: `${itemSize}px` }"
+        @click="handleView(item.cover_url)"
       />
       <!--   下载    -->
       <div class="download" style="color: #129be3" @click.stop>
@@ -166,6 +191,8 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <!-- 使用自定义预览组件 -->
+    <CustomImagePreview v-model:model-value="previewVisible" :src="previewUrl" />
   </div>
 </template>
 

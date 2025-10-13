@@ -15,6 +15,15 @@ export const useMaterialStore = defineStore(
     const MIN_MS = 300
     const start = Date.now()
     const loading = ref<boolean>(true)
+    // 是否勾选下载和收藏
+    const collect = ref(false)
+    const download = ref(false)
+    const setCollect = (val: boolean) => {
+      collect.value = val
+    }
+    const setDownload = (val: boolean) => {
+      download.value = val
+    }
     // 统一设置分页
     const materialTotal = ref(0)
     const pageNum = ref(1)
@@ -93,6 +102,12 @@ export const useMaterialStore = defineStore(
       downLoadList.value = res.data
     }
 
+    // 返回当前用户对应素材的下载路径
+    const downLoadFilePathGet = (materialId: string): string => {
+      const item = downLoadList.value.find((item) => item.material_id === materialId)
+      return item?.file_path || '' // 找不到就返回空字符串，避免 undefined
+    }
+
     // 前端是否显示下载的UI状态函数
     const isDownloaded = (materialId: string): boolean => {
       if (!downLoadList.value?.length) return false
@@ -154,6 +169,10 @@ export const useMaterialStore = defineStore(
 
     return {
       loading,
+      collect,
+      download,
+      setCollect,
+      setDownload,
       pageNum,
       pageSize,
       setPageNum,
@@ -167,6 +186,7 @@ export const useMaterialStore = defineStore(
       filterLove,
       setFilterLove,
       downLoadList,
+      downLoadFilePathGet,
       downLoadListGet,
       isDownloaded,
       setDownloadProgress,

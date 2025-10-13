@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import {
   useCategoryStore,
   useLanguageStore,
@@ -17,9 +17,6 @@ const materialStore = useMaterialStore()
 const userStore = useUserStore()
 const languageStore = useLanguageStore()
 
-const isDown = ref(false)
-const isLove = ref(false)
-
 // 一级分类
 const selectAllCate = async () => {
   console.log('全部')
@@ -34,8 +31,8 @@ const selectAllCate = async () => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    isDown.value,
-    isLove.value,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -60,8 +57,8 @@ const handleChangeCate = async (cateId: string) => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    isDown.value,
-    isLove.value,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -78,8 +75,8 @@ const selectAllSub = async () => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    isDown.value,
-    isLove.value,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -102,8 +99,8 @@ const handleChangeSubCate = async (cateId: string) => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    isDown.value,
-    isLove.value,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -119,8 +116,8 @@ const selectAllThird = async () => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    isDown.value,
-    isLove.value,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }
@@ -138,8 +135,8 @@ const handleChangeThirdCate = async (cateId: string) => {
     categoryStore.currentThirdCateId,
     tagStore.selectedAittribuleIds,
     tagStore.selectedColorIds,
-    isDown.value,
-    isLove.value,
+    materialStore.download,
+    materialStore.collect,
     userStore.userInfo._id
   )
 }

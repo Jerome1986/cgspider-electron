@@ -1,12 +1,13 @@
 // 监听下载进度函数
 import { materialDownLoadListApiAdd } from '@/api/material'
 import { useMaterialStore, useUserStore } from '@/stores'
-import { ElMessage } from 'element-plus'
 
+// 定义store
 const userStore = useUserStore()
 const materialStore = useMaterialStore()
 
 export const onProgress = (_e, p: { materialId: string; received: number; total: number }) => {
+  console.log('onProgress', p)
   materialStore.setDownloadProgress(p.materialId, p.received, p.total)
 }
 
@@ -24,9 +25,7 @@ export async function onDone(_, p: Done) {
   await materialDownLoadListApiAdd(userStore.userInfo._id, p.materialId, p.path)
   if (p.state === 'completed') {
     //  下载成功给与提示并重新获取下载列表刷新状态
-
     await materialStore.downLoadListGet(userStore.userInfo._id)
-    setTimeout(() => ElMessage.success('下载成功'), 500)
   }
   materialStore.clearDownloadProgress(p.materialId)
 }
