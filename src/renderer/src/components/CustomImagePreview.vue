@@ -133,6 +133,7 @@ function onKeyDown(e) {
   left: 0;
   width: 100%;
   height: 100%;
+  background-image: var(--watermark-url);
   background-repeat: no-repeat;
   background-position: center;
   background-size: 30%;

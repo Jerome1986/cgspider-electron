@@ -7,7 +7,7 @@ const userStore = useUserStore()
 const materialStore = useMaterialStore()
 
 export const onProgress = (_e, p: { materialId: string; received: number; total: number }) => {
-  console.log('onProgress', p)
+  console.log('onProgress', p.received)
   materialStore.setDownloadProgress(p.materialId, p.received, p.total)
 }
 

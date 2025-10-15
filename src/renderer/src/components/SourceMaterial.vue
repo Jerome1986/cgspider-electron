@@ -10,6 +10,7 @@ import { materialListLoveApi } from '@/api/material'
 import { useClipboard } from '@vueuse/core'
 import { onDone, onProgress } from '@/utils/download'
 import CustomImagePreview from '@/components/CustomImagePreview.vue'
+import { watermarkGetApi } from '@/api/watermark'
 
 // 复制文本
 const { copy, copied } = useClipboard()
@@ -104,7 +105,18 @@ const handleView = (url: string) => {
   previewUrl.value = url
 }
 
+// 获取水印
+const watermarkUrl = ref('')
+const watermarkGet = async () => {
+  const res = await watermarkGetApi(2)
+  watermarkUrl.value = res.data[0].images
+  console.log('水印', watermarkUrl.value)
+  // 设置CSS变量
+  document.documentElement.style.setProperty('--watermark-url', `url(${watermarkUrl.value})`)
+}
+
 onMounted(() => {
+  watermarkGet()
   // 通过滚轮动态控制尺寸
   document.addEventListener('wheel', handleWheel, { passive: false })
   // 监听下载进度
