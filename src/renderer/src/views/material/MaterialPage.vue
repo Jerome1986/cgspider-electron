@@ -26,8 +26,8 @@ onMounted(async () => {
 
 <template>
   <div class="materialPage">
-    <el-affix position="top" :offset="50" target=".materialPage">
-      <div style="padding: 16px; background-color: #0f0f10; width: 100%">
+    <el-affix position="top" :offset="51" target=".materialPage">
+      <div style="padding: 16px; background-color: #0f0f10">
         <!-- 分类   -->
         <CgsCategory></CgsCategory>
         <!--  属性标签  -->
@@ -77,6 +77,10 @@ onMounted(async () => {
   &::after {
     background: radial-gradient(120% 120% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.35) 100%);
     opacity: 0.6;
+  }
+
+  .el-affix {
+    width: 100% !important;
   }
 }
 </style>

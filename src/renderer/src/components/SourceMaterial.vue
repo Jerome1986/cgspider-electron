@@ -11,6 +11,7 @@ import { useClipboard } from '@vueuse/core'
 import { downloadVerify, onDone, onProgress } from '@/utils/download'
 import CustomImagePreview from '@/components/CustomImagePreview.vue'
 import { watermarkGetApi } from '@/api/watermark'
+import router from '@/router'
 
 // 复制文本
 const { copy, copied } = useClipboard()
@@ -64,10 +65,11 @@ const handleFunction = async (value: string, materialId: string) => {
       break
     case 'full':
       console.log('平铺')
+      await router.push(`/full/${encodeURIComponent(materialId)}`)
       break
     case 'openFile': {
-      console.log('打开文件夹')
       const filePath = materialStore.downLoadFilePathGet(materialId)
+      console.log('打开文件夹', filePath)
       if (filePath) {
         window.electron.ipcRenderer.invoke('show-file', filePath)
       } else {

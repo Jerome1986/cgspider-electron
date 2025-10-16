@@ -39,7 +39,9 @@ export async function handleDownload(win: BrowserWindow, payload: DownloadPayloa
 
   win.webContents.session.once('will-download', (_event, item) => {
     const suggested = sanitizeName(item.getFilename())
+    console.log('ming', suggested)
     const finalPath = path.win32.join(finalDir, suggested)
+    console.log('要存的路径', finalPath)
     // 设置存储路径
     item.setSavePath(finalPath)
 
@@ -71,10 +73,12 @@ export async function handleDownload(win: BrowserWindow, payload: DownloadPayloa
 
     // 下载完成时
     item.once('done', async (_e3, state) => {
+      console.log('done', finalPath)
+      const { dir, name } = path.parse(finalPath)
       // 先发送下载完成事件
       win.webContents.send('download-done', {
         state,
-        path: finalPath,
+        path: dir,
         name: suggested,
         materialId
       })
@@ -87,8 +91,8 @@ export async function handleDownload(win: BrowserWindow, payload: DownloadPayloa
         if (ext === '.zip') {
           // 只处理 .zip 文件
           // 创建同名文件夹作为解压目标
-          const { dir, name } = path.parse(finalPath)
-          const extractDir = path.win32.join(dir, name)
+          console.log('文件夹名', dir, 'name', name)
+          const extractDir = path.win32.join(dir)
 
           // 确保解压目标目录存在
           try {
@@ -97,6 +101,13 @@ export async function handleDownload(win: BrowserWindow, payload: DownloadPayloa
 
             await extractZip(finalPath, { dir: extractDir })
             console.log('解压成功') // 调试用
+
+            // 删除压缩包
+            try {
+              fs.unlinkSync(finalPath)
+            } catch (unlinkErr) {
+              console.error('删除压缩包失败:', unlinkErr)
+            }
 
             win.webContents.send('unzip-done', {
               ok: true,

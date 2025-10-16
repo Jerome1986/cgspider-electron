@@ -22,6 +22,7 @@ interface Done {
 
 // 下载完成
 export async function onDone(_, p: Done) {
+  console.log('onDone', p.path)
   // 添加到下载列表
   await materialDownLoadListApiAdd(userStore.userInfo._id, p.materialId, p.path)
   if (p.state === 'completed') {

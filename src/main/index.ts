@@ -53,7 +53,7 @@ function createWindow(): void {
 
   // 处理下载
   ipcMain.handle('download-file', async (_, payload: DownloadPayload) => {
-    console.log('开始下载')
+    console.log('开始下载', payload)
     // getFocusedWindow 为获取当前正在操作的焦点窗口
     const win = BrowserWindow.getFocusedWindow() || mainWindow
     return handleDownload(win!, payload)
@@ -61,12 +61,21 @@ function createWindow(): void {
 
   // 打开在本地已下载的文件夹
   ipcMain.handle('show-file', async (_, filePath: string) => {
+    console.log('主进程', filePath)
     shell.showItemInFolder(filePath)
   })
 
   // 显示主窗口
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
+  })
+
+  mainWindow.on('maximize', () => {
+    mainWindow?.webContents.send('window-maximized')
+  })
+
+  mainWindow.on('unmaximize', () => {
+    mainWindow?.webContents.send('window-unmaximized')
   })
 
   mainWindow.on('closed', () => {

@@ -77,5 +77,9 @@ onMounted(async () => {
     background: radial-gradient(120% 120% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.35) 100%);
     opacity: 0.6;
   }
+
+  .el-affix {
+    width: 100% !important;
+  }
 }
 </style>

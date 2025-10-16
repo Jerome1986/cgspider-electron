@@ -10,6 +10,8 @@ export const useUserStore = defineStore(
     // 用户登录后返回的信息
     const userInfo = ref<LoginResponse>(createDefaultUserInfo())
 
+    const remainingUses = ref(0)
+
     // 设置用户信息
     const setUserInfo = (value: LoginResponse): void => {
       console.log('setUserInfo', value)
@@ -18,7 +20,7 @@ export const useUserStore = defineStore(
 
     // 同步下载次数
     const setUserDownload = (value: number): void => {
-      userInfo.value.dailyDownloadLimit = value
+      remainingUses.value = value
     }
 
     // 同步金币
@@ -30,6 +32,7 @@ export const useUserStore = defineStore(
     const clearToken = (): LoginResponse => (userInfo.value = createDefaultUserInfo())
 
     return {
+      remainingUses,
       userInfo,
       setUserInfo,
       clearToken,

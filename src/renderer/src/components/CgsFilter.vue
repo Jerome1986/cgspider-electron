@@ -93,7 +93,7 @@ const resetFilter = async () => {
         v-model:page-size="materialStore.pageSize"
         background
         size="small"
-        :page-sizes="[10, 50, 80, 100]"
+        :page-sizes="[10, 50, 80, 100, 200]"
         layout="total, sizes, prev, pager, next"
         :total="materialStore.materialTotal"
         @size-change="handleSizeChange"
@@ -105,7 +105,7 @@ const resetFilter = async () => {
       <el-input
         v-model="searchValue"
         class="custom-input"
-        placeholder="请输入关键词"
+        :placeholder="languageStore.gt('请输入关键词', 'Please enter a keyword')"
         :prefix-icon="Search"
         clearable
         @clear="handleClear"
@@ -126,7 +126,7 @@ const resetFilter = async () => {
         style="color: #ffffff"
       />
       <!-- 重置所有筛选 -->
-      <div class="reset" @click="resetFilter">重置</div>
+      <div class="reset" @click="resetFilter">{{ languageStore.gt('重置', 'reset') }}</div>
     </div>
   </div>
 </template>

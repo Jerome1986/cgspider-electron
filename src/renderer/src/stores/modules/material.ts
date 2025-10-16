@@ -106,6 +106,7 @@ export const useMaterialStore = defineStore(
     // 返回当前用户对应素材的下载路径
     const downLoadFilePathGet = (materialId: string): string => {
       const item = downLoadList.value.find((item) => item.material_id === materialId)
+      console.log(item?.file_path)
       return item?.file_path || '' // 找不到就返回空字符串，避免 undefined
     }
 

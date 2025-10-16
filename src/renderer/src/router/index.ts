@@ -37,6 +37,8 @@ const router = createRouter({
           name: 'Maps',
           component: () => import('@/views/maps/MapsPage.vue')
         },
+        // 贴图铺满全屏
+        { path: '/full/:cover_url', component: () => import('@/views/maps/FullScreen.vue') },
         {
           path: '/model',
           name: 'Model',
