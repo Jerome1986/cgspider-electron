@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 
-export const itemSize = ref(470) // 默认尺寸
+export const itemSize = ref(525) // 默认尺寸
 const minSize = 200 // 最小尺寸
 const maxSize = 600 // 最大尺寸
 

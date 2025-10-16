@@ -2,13 +2,13 @@
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { CheckboxValueType } from 'element-plus'
-import { useMaterialStore, usePageTypeStore, useUserStore } from '@/stores'
+import { useLanguageStore, useMaterialStore, usePageTypeStore } from '@/stores'
 import { materialListFilter } from '@/composables/materialListFilter'
 
 // 定义 Store
 const pageTypeStore = usePageTypeStore()
 const materialStore = useMaterialStore()
-const userStore = useUserStore()
+const languageStore = useLanguageStore()
 
 // 处理分页--每页条数
 const handleSizeChange = async (size: number) => {
@@ -111,16 +111,20 @@ const resetFilter = async () => {
         @clear="handleClear"
         @keydown.enter="searchGetMaterial"
       />
-      <div class="searchBtn" @click="searchGetMaterial">查询</div>
+      <div class="searchBtn" @click="searchGetMaterial">{{ languageStore.gt('查询', 'search') }}</div>
     </div>
     <!--   筛选区   -->
     <div class="filter">
       <el-checkbox-group v-model="materialStore.checkListFilter" @change="changeFilter">
-        <el-checkbox label="本机有" value="download" />
-        <el-checkbox label="已收藏" value="collect" />
+        <el-checkbox :label="languageStore.gt('本机有', 'local')" value="download" />
+        <el-checkbox :label="languageStore.gt('已收藏', 'collect')" value="collect" />
       </el-checkbox-group>
       <!--  单独控制--显示文本  -->
-      <el-checkbox v-model="materialStore.showText" label="显示信息" style="color: #ffffff" />
+      <el-checkbox
+        v-model="materialStore.showText"
+        :label="languageStore.gt('显示信息', 'showText')"
+        style="color: #ffffff"
+      />
       <!-- 重置所有筛选 -->
       <div class="reset" @click="resetFilter">重置</div>
     </div>

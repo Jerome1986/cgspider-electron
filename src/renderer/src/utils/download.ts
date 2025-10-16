@@ -41,7 +41,7 @@ export const downloadVerify = async (materialId: string, userId: string) => {
     // 失败错误已经在后端处理，前端通过axios自动返回错误
     // 成功返回--更新store
     res.data.type === 'limit'
-      ? userStore.setUserInfo({ dailyDownloadLimit: res.data.resultLimit })
-      : userStore.setUserInfo({ coins: res.data.newCoins })
+      ? userStore.setUserDownload(res.data.resultLimit!)
+      : userStore.setUserCoins(res.data.newCoins!)
   }
 }

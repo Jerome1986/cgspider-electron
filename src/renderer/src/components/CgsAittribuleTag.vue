@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useLanguageStore, usePageTypeStore, useUserStore } from '@/stores'
+import { useLanguageStore, usePageTypeStore } from '@/stores'
 import { useTagStore } from '@/stores/modules/tags'
 import { materialListFilter } from '@/composables/materialListFilter'
 
 // 定义store
 const pageTypeStore = usePageTypeStore()
 const tagStore = useTagStore()
-const userStore = useUserStore()
 const languageStore = useLanguageStore()
 
 // 处理标签切换点击

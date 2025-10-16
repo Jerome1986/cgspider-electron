@@ -10,7 +10,7 @@ let mainWindow: BrowserWindow | null = null
 function createWindow(): void {
   // 创建浏览器窗口。
   mainWindow = new BrowserWindow({
-    minWidth: 1050,
+    minWidth: 1160,
     minHeight: 860,
     show: false,
     autoHideMenuBar: true,

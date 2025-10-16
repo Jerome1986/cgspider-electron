@@ -14,6 +14,7 @@ declare module 'vue' {
     CgsFilter: typeof import('./src/components/CgsFilter.vue')['default']
     CgsHeader: typeof import('./src/components/CgsHeader.vue')['default']
     CustomImagePreview: typeof import('./src/components/CustomImagePreview.vue')['default']
+    ElAffix: typeof import('element-plus/es')['ElAffix']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']

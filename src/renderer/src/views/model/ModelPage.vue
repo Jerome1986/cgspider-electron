@@ -5,11 +5,10 @@ import CgsColorTag from '@/components/CgsColorTag.vue'
 import CgsFilter from '@/components/CgsFilter.vue'
 import SourceMaterial from '@/components/SourceMaterial.vue'
 import { onMounted } from 'vue'
-import { useMaterialStore, usePageTypeStore, useUserStore } from '@/stores'
+import { useMaterialStore, useUserStore } from '@/stores'
 import { materialListFilter } from '@/composables/materialListFilter'
 
 // 定义 store
-const pageTypeStore = usePageTypeStore()
 const materialStore = useMaterialStore()
 const userStore = useUserStore()
 

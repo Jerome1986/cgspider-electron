@@ -5,11 +5,10 @@ import CgsColorTag from '@/components/CgsColorTag.vue'
 import CgsFilter from '@/components/CgsFilter.vue'
 import SourceMaterial from '@/components/SourceMaterial.vue'
 import { onMounted } from 'vue'
-import { useMaterialStore, usePageTypeStore, useUserStore } from '@/stores'
+import { useMaterialStore, useUserStore } from '@/stores'
 import { materialListFilter } from '@/composables/materialListFilter'
 
 // 定义 store
-const pageTypeStore = usePageTypeStore()
 const materialStore = useMaterialStore()
 const userStore = useUserStore()
 
@@ -27,16 +26,19 @@ onMounted(async () => {
 
 <template>
   <div class="materialPage">
-    <div style="padding: 16px">
-      <!-- 分类   -->
-      <CgsCategory></CgsCategory>
-      <!--  属性标签  -->
-      <CgsAittribuleTag></CgsAittribuleTag>
-      <!--  颜色标签  -->
-      <CgsColorTag></CgsColorTag>
-    </div>
-    <!--  筛选  -->
-    <CgsFilter></CgsFilter>
+    <el-affix position="top" :offset="50" target=".materialPage">
+      <div style="padding: 16px; background-color: #0f0f10; width: 100%">
+        <!-- 分类   -->
+        <CgsCategory></CgsCategory>
+        <!--  属性标签  -->
+        <CgsAittribuleTag></CgsAittribuleTag>
+        <!--  颜色标签  -->
+        <CgsColorTag></CgsColorTag>
+      </div>
+      <!--  筛选  -->
+      <CgsFilter></CgsFilter>
+    </el-affix>
+
     <!--  素材  -->
     <SourceMaterial></SourceMaterial>
   </div>

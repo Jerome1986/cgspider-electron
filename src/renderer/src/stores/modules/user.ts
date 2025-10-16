@@ -16,13 +16,25 @@ export const useUserStore = defineStore(
       userInfo.value = { ...userInfo.value, ...value }
     }
 
+    // 同步下载次数
+    const setUserDownload = (value: number): void => {
+      userInfo.value.dailyDownloadLimit = value
+    }
+
+    // 同步金币
+    const setUserCoins = (value: number): void => {
+      userInfo.value.coins = value
+    }
+
     // 清空token
     const clearToken = (): LoginResponse => (userInfo.value = createDefaultUserInfo())
 
     return {
       userInfo,
       setUserInfo,
-      clearToken
+      clearToken,
+      setUserDownload,
+      setUserCoins
     }
   },
   {

@@ -80,8 +80,11 @@ export const request = async <T>(options: AxiosRequestConfig): Promise<Data<T>> 
     // 一切正常
     return data
   } catch (error) {
-    throw new Error(msg)
+    // throw new Error(msg)
+    console.error(error)
   }
+
+  return {} as Data<T>
 }
 
 export { baseURL, getErrorMessage }
