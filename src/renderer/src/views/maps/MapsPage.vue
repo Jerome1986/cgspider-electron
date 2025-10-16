@@ -26,16 +26,18 @@ onMounted(async () => {
 
 <template>
   <div class="mapsPage">
-    <div style="padding: 16px">
-      <!-- 分类   -->
-      <CgsCategory></CgsCategory>
-      <!--  属性标签  -->
-      <CgsAittribuleTag></CgsAittribuleTag>
-      <!--  颜色标签  -->
-      <CgsColorTag></CgsColorTag>
-    </div>
-    <!--  筛选  -->
-    <CgsFilter></CgsFilter>
+    <el-affix position="top" :offset="50" target=".materialPage">
+      <div style="padding: 16px; background-color: #0f0f10; width: 100%">
+        <!-- 分类   -->
+        <CgsCategory></CgsCategory>
+        <!--  属性标签  -->
+        <CgsAittribuleTag></CgsAittribuleTag>
+        <!--  颜色标签  -->
+        <CgsColorTag></CgsColorTag>
+      </div>
+      <!--  筛选  -->
+      <CgsFilter></CgsFilter>
+    </el-affix>
     <!--  素材  -->
     <SourceMaterial></SourceMaterial>
   </div>
