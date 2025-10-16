@@ -2,12 +2,11 @@
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { CheckboxValueType } from 'element-plus'
-import { useCategoryStore, useMaterialStore, usePageTypeStore, useTagStore, useUserStore } from '@/stores'
+import { useMaterialStore, usePageTypeStore, useUserStore } from '@/stores'
+import { materialListFilter } from '@/composables/materialListFilter'
 
 // 定义 Store
 const pageTypeStore = usePageTypeStore()
-const categoryStore = useCategoryStore()
-const tagStore = useTagStore()
 const materialStore = useMaterialStore()
 const userStore = useUserStore()
 
@@ -19,17 +18,7 @@ const handleSizeChange = async (size: number) => {
   isSearch.value = false
 
   // 渲染数据
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    materialStore.download,
-    materialStore.collect,
-    userStore.userInfo._id
-  )
+  await materialListFilter()
 }
 
 // 处理翻页
@@ -40,17 +29,7 @@ const handleCurrentChange = async (current: number) => {
     await materialStore.searchKeywords(pageTypeStore.currentPageType, searchValue.value)
   } else {
     // 渲染数据
-    await materialStore.materialListFilterGet(
-      pageTypeStore.currentPageType,
-      categoryStore.currentCateId,
-      categoryStore.currentSubCateId,
-      categoryStore.currentThirdCateId,
-      tagStore.selectedAittribuleIds,
-      tagStore.selectedColorIds,
-      materialStore.download,
-      materialStore.collect,
-      userStore.userInfo._id
-    )
+    await materialListFilter()
   }
 }
 
@@ -61,18 +40,8 @@ const handleClear = async () => {
   searchValue.value = ''
   isSearch.value = false
   materialStore.setPageNum(1)
-  // 渲染素材
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    materialStore.download,
-    materialStore.collect,
-    userStore.userInfo._id
-  )
+  // 渲染数据
+  await materialListFilter()
 }
 
 // 点击查询--搜索
@@ -86,7 +55,6 @@ const searchGetMaterial = async () => {
 }
 
 // 处理筛选
-const checkListFilter = ref([])
 const changeFilter = async (value: CheckboxValueType[]) => {
   materialStore.setCollect(value.includes('collect'))
   materialStore.setDownload(value.includes('download'))
@@ -98,38 +66,21 @@ const changeFilter = async (value: CheckboxValueType[]) => {
   searchValue.value = ''
   isSearch.value = false
 
-  // 渲染素材
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    materialStore.download,
-    materialStore.collect,
-    userStore.userInfo._id
-  )
+  // 渲染数据
+  await materialListFilter()
 }
 
 // 重置筛选
 const resetFilter = async () => {
   console.log('重置筛选')
-  checkListFilter.value = []
-  materialStore.showText = false
-  searchValue.value = ''
-  // 渲染素材
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    false,
-    false,
-    userStore.userInfo._id
-  )
+  materialStore.setPageNum(1) // 重置页码
+  materialStore.checkListFilter = [] // 重置下载/收藏筛选组
+  materialStore.setDownload(false) // 重置是否勾选
+  materialStore.setCollect(false) // 重置是否收藏
+  materialStore.showText = false // 重置显示文本
+  searchValue.value = '' // 重置搜索框
+  // 渲染数据
+  await materialListFilter()
 }
 </script>
 
@@ -164,7 +115,7 @@ const resetFilter = async () => {
     </div>
     <!--   筛选区   -->
     <div class="filter">
-      <el-checkbox-group v-model="checkListFilter" @change="changeFilter">
+      <el-checkbox-group v-model="materialStore.checkListFilter" @change="changeFilter">
         <el-checkbox label="本机有" value="download" />
         <el-checkbox label="已收藏" value="collect" />
       </el-checkbox-group>

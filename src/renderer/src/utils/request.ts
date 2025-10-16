@@ -30,9 +30,9 @@ function getErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
     return error.response?.data?.message || error.message || '服务异常'
   }
-  // if (error instanceof Error) {
-  //   return error.message
-  // }
+  if (error instanceof Error) {
+    return error.message
+  }
   return '服务异常'
 }
 
@@ -80,8 +80,6 @@ export const request = async <T>(options: AxiosRequestConfig): Promise<Data<T>> 
     // 一切正常
     return data
   } catch (error) {
-    const msg = getErrorMessage(error)
-    safeShowMessage(msg)
     throw new Error(msg)
   }
 }

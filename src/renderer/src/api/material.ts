@@ -1,6 +1,7 @@
 import { request } from '@/utils/request'
 import { MaterialDownLoad, MaterialLoveResult, MaterialPageResult } from '@/types/Material'
 import { addResult } from '@/types/Global '
+import { updateDownloadInfo } from '@/types/Users'
 
 /**
  * 综合筛选素材
@@ -120,5 +121,18 @@ export const materialDownLoadListApiAdd = (user_id: string, material_id: string,
     method: 'POST',
     url: '/user-add-download',
     data: { user_id, material_id, file_path }
+  })
+}
+
+/**
+ * 用户下载时验证--记录今日下载次数/扣除金币
+ * /user-downloadsUsed
+ * @param userId - 当前用户ID
+ */
+export const downloadVerifyApi = (userId: string) => {
+  return request<updateDownloadInfo>({
+    method: 'POST',
+    url: '/user-downloadsUsed',
+    data: { userId }
   })
 }

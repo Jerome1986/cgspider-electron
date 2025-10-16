@@ -5,29 +5,18 @@ import CgsColorTag from '@/components/CgsColorTag.vue'
 import CgsFilter from '@/components/CgsFilter.vue'
 import SourceMaterial from '@/components/SourceMaterial.vue'
 import { onMounted } from 'vue'
-import { useCategoryStore, useMaterialStore, usePageTypeStore, useTagStore, useUserStore } from '@/stores'
+import { useMaterialStore, usePageTypeStore, useUserStore } from '@/stores'
+import { materialListFilter } from '@/composables/materialListFilter'
 
 // 定义 store
 const pageTypeStore = usePageTypeStore()
-const categoryStore = useCategoryStore()
-const tagStore = useTagStore()
 const materialStore = useMaterialStore()
 const userStore = useUserStore()
 
 onMounted(async () => {
   await Promise.all([
     // 渲染素材
-    materialStore.materialListFilterGet(
-      pageTypeStore.currentPageType,
-      categoryStore.currentCateId,
-      categoryStore.currentSubCateId,
-      categoryStore.currentThirdCateId,
-      tagStore.selectedAittribuleIds,
-      tagStore.selectedColorIds,
-      false,
-      false,
-      userStore.userInfo._id
-    ),
+    materialListFilter(),
     //   获取收藏列表
     materialStore.materialLoveListGet(userStore.userInfo._id),
     // 获取下载列表
@@ -46,8 +35,9 @@ onMounted(async () => {
       <!--  颜色标签  -->
       <CgsColorTag></CgsColorTag>
     </div>
-    <!--  素材标签  -->
+    <!--  筛选  -->
     <CgsFilter></CgsFilter>
+    <!--  素材  -->
     <SourceMaterial></SourceMaterial>
   </div>
 </template>

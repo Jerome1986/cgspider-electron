@@ -8,7 +8,7 @@ import { ElMessage } from 'element-plus'
 import { MaterialItem } from '@/types/Material'
 import { materialListLoveApi } from '@/api/material'
 import { useClipboard } from '@vueuse/core'
-import { onDone, onProgress } from '@/utils/download'
+import { downloadVerify, onDone, onProgress } from '@/utils/download'
 import CustomImagePreview from '@/components/CustomImagePreview.vue'
 import { watermarkGetApi } from '@/api/watermark'
 
@@ -37,6 +37,9 @@ const handleDownload = async (item: MaterialItem) => {
     ElMessage.error('请先设置下载路径')
     return
   }
+  // todo 下载前验证 --- 未通过函数内部会阻止
+  await downloadVerify(item._id, userStore.userInfo._id)
+  // 下载逻辑
   const subDirs = [pageTypeStore.currentPageType, item.name]
   const url = item.files_url
   const materialId = item._id
@@ -135,6 +138,7 @@ onMounted(() => {
     <div v-for="item in materialStore.materialList" :key="item._id" class="materialItem" draggable="true">
       <!-- 使用 el-image 替换背景图 -->
       <el-image
+        :lazy="true"
         class="material-image"
         :src="item.cover_url"
         :zoom-rate="1.2"
@@ -150,12 +154,12 @@ onMounted(() => {
       <div class="download" style="color: #129be3" @click.stop>
         <i
           class="iconfont icon-xiazaichenggong"
-          style="font-size: 20px; opacity: 0"
+          style="font-size: 20px; opacity: 0; color: #27b20b"
           :style="{ opacity: materialStore.isDownloaded(item._id) ? 100 : 0 }"
         ></i>
         <i
           class="iconfont icon-xiazai_xiazai hover-visible"
-          style="font-size: 17px; color: #ffffff; cursor: pointer"
+          style="font-size: 17px; color: #129be3; cursor: pointer"
           @click="handleDownload(item)"
         ></i>
       </div>

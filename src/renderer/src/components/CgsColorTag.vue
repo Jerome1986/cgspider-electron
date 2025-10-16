@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useCategoryStore, useLanguageStore, useMaterialStore, usePageTypeStore, useUserStore } from '@/stores'
+import { useLanguageStore, usePageTypeStore, useUserStore } from '@/stores'
 import { useTagStore } from '@/stores/modules/tags'
+import { materialListFilter } from '@/composables/materialListFilter'
 
 // 定义store
 const pageTypeStore = usePageTypeStore()
-const categoryStore = useCategoryStore()
 const tagStore = useTagStore()
-const materialStore = useMaterialStore()
 const userStore = useUserStore()
 const languageStore = useLanguageStore()
 
@@ -15,18 +14,8 @@ const languageStore = useLanguageStore()
 const handleChangeColorTag = async (colorTagId: string) => {
   console.log(colorTagId, tagStore.selectedColorIds)
   tagStore.setColorTag(colorTagId)
-  // 渲染素材
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    false,
-    false,
-    userStore.userInfo._id
-  )
+  // 渲染数据
+  await materialListFilter()
 }
 
 onMounted(async () => {

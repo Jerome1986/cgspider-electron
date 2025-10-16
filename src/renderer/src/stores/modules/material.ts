@@ -24,6 +24,7 @@ export const useMaterialStore = defineStore(
     const setDownload = (val: boolean) => {
       download.value = val
     }
+    const checkListFilter = ref([]) // 筛选组 放入store，防止刷新后状态丢失
     // 统一设置分页
     const materialTotal = ref(0)
     const pageNum = ref(1)
@@ -173,6 +174,7 @@ export const useMaterialStore = defineStore(
       download,
       setCollect,
       setDownload,
+      checkListFilter,
       pageNum,
       pageSize,
       setPageNum,

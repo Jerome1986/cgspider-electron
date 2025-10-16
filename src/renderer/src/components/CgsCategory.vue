@@ -39,7 +39,7 @@ const selectAllCate = async () => {
 
 // 一级分类发生改变时
 const handleChangeCate = async (cateId: string) => {
-  console.log(cateId)
+  materialStore.setPageNum(1)
   // 重置二级分类
   categoryStore.setCurrentSubCateId('')
   categoryStore.setCurrentThirdCateId('')

@@ -38,3 +38,12 @@ export interface LoginResponse {
   /** 会员类型，决定权限和限制 */
   membershipType: MembershipType
 }
+
+export interface updateDownloadInfo {
+  /** 本次更新的类型 */
+  type: 'limit' | 'coins'
+  /** 更新后的可下载次数 */
+  resultLimit?: number
+  /** 更新后的可用的金币数量 */
+  newCoins?: number
+}

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import {
@@ -18,8 +18,15 @@ import { calcMembershipLeft } from '@/utils/calcMembershipLeft'
 import { vipEndTimePutApi } from '@/api/user'
 
 // 定义store
+const userStore = useUserStore()
 const pathStore = usePathStore()
 const languageStore = useLanguageStore()
+
+// 剩余下载次数
+const usedLimit = computed(() => {
+  let count = userStore.userInfo.dailyDownloadLimit - userStore.userInfo.dailyDownloadsUsed
+  return count >= 0 ? count : 0
+})
 
 // 页面切换语言
 const languageSwitch = ref(languageStore.languageSwitch ?? false)
@@ -31,8 +38,6 @@ const handleChangeSwitch = (val: boolean | string | number): void => {
 
 // 导入路由
 const router = useRouter()
-// 用户全局管理
-const userStore = useUserStore()
 
 // 功能菜单
 const showMenu = ref(false)
@@ -104,6 +109,7 @@ onMounted(async () => {
       <div class="downLimit">
         {{ languageStore.gt('下载次数', 'downLimit') }}：{{ userStore.userInfo.dailyDownloadLimit }}
       </div>
+      <div class="downLimit">{{ languageStore.gt('剩余次数', 'Remaining times') }}：{{ usedLimit }}</div>
       <!-- 会员到期时间  -->
       <div v-if="userStore.userInfo.role === 'vip'" class="vipEndTime">
         {{ languageStore.gt('会员到期时间', 'endTime') }}：{{ formatTimestamp(userStore.userInfo.membershipExpiry!) }}
