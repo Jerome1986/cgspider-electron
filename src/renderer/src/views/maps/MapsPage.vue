@@ -26,7 +26,7 @@ onMounted(async () => {
 
 <template>
   <div class="mapsPage">
-    <el-affix position="top" :offset="50" target=".materialPage">
+    <el-affix position="top" :offset="50" target=".mapsPage">
       <div style="padding: 16px; background-color: #0f0f10; width: 100%">
         <!-- 分类   -->
         <CgsCategory></CgsCategory>
