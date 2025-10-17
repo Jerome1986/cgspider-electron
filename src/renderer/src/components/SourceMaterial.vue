@@ -12,6 +12,7 @@ import { downloadVerify, onDone, onProgress } from '@/utils/download'
 import CustomImagePreview from '@/components/CustomImagePreview.vue'
 import { watermarkGetApi } from '@/api/watermark'
 import router from '@/router'
+import { onDragStart } from '@/utils/onDragStart'
 
 // 复制文本
 const { copy, copied } = useClipboard()
@@ -137,7 +138,13 @@ onMounted(() => {
     :throttle="{ leading: 300, trailing: 200 }"
   />
   <div v-else class="sourceMaterial">
-    <div v-for="item in materialStore.materialList" :key="item._id" class="materialItem" draggable="true">
+    <div
+      v-for="item in materialStore.materialList"
+      :key="item._id"
+      class="materialItem"
+      draggable="true"
+      @dragstart.prevent="onDragStart(item._id)"
+    >
       <!-- 使用 el-image 替换背景图 -->
       <el-image
         :lazy="true"

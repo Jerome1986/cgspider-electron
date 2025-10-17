@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { changeWindow, DownloadPayload, handleDownload, quitWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
 import { openPaymentWindow } from '@main/window/payWindow'
+import { startDrag } from '@main/utls/modules/startDrag'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -62,7 +63,22 @@ function createWindow(): void {
   // 打开在本地已下载的文件夹
   ipcMain.handle('show-file', async (_, filePath: string) => {
     console.log('主进程', filePath)
-    shell.showItemInFolder(filePath)
+    await shell.openPath(filePath)
+  })
+
+  // 处理拖拽
+  ipcMain.handle('startDrag', async (event, basePath: string, fileType: string, txtFile: string) => {
+    const { success, dragFile, tempIcon } = startDrag(basePath, fileType, txtFile)
+
+    if (success && dragFile && tempIcon) {
+      event.sender.startDrag({
+        file: dragFile,
+        icon: tempIcon
+      })
+      console.log('拖拽处理文件成功', dragFile)
+    } else {
+      console.log('拖拽处理文件失败')
+    }
   })
 
   // 显示主窗口

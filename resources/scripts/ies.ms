@@ -1,0 +1,1 @@
+﻿messageBox "lighting is ok"

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { LoginResponse } from '@/types/Users'
 import { createDefaultUserInfo } from '@/config/BaseInfo'
 
@@ -10,7 +10,10 @@ export const useUserStore = defineStore(
     // 用户登录后返回的信息
     const userInfo = ref<LoginResponse>(createDefaultUserInfo())
 
-    const remainingUses = ref(0)
+    // 通过计算属性计算剩余的下载次数
+    const remainingUses = computed(() => {
+      return userInfo.value.dailyDownloadLimit - userInfo.value.dailyDownloadsUsed
+    })
 
     // 设置用户信息
     const setUserInfo = (value: LoginResponse): void => {
@@ -18,9 +21,9 @@ export const useUserStore = defineStore(
       userInfo.value = { ...userInfo.value, ...value }
     }
 
-    // 同步下载次数
+    // 同步今日下载次数
     const setUserDownload = (value: number): void => {
-      remainingUses.value = value
+      userInfo.value.dailyDownloadsUsed = value
     }
 
     // 同步金币
