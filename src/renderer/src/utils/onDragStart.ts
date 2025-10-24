@@ -16,6 +16,7 @@ export const onDragStart = async (materialId: string) => {
 
   // 2.准备参数
   const basePath = materialStore.downLoadFilePathGet(materialId) // 对应文件的本地路径
+  console.log('basePath', basePath)
   const fileType = pageTypeStore.currentPagePath.replace(/^\/+/, '') // 用正则去掉路径的/  获取类型
   let txtFile = '' // 拖拽过程中生成的临时文本文件名，用于存放“资源路径”给脚本读取
   switch (fileType) {
@@ -29,6 +30,6 @@ export const onDragStart = async (materialId: string) => {
       txtFile = 'matdata.txt'
       break
   }
-  console.log('Drag start', isDownload, basePath, fileType, txtFile)
+  // console.log('Drag start', isDownload, basePath, fileType, txtFile)
   await window.electron.ipcRenderer.invoke('startDrag', basePath, fileType, txtFile)
 }

@@ -24,7 +24,8 @@ interface Done {
 export async function onDone(_, p: Done) {
   console.log('onDone', p.path)
   // 添加到下载列表
-  await materialDownLoadListApiAdd(userStore.userInfo._id, p.materialId, p.path)
+  const res = await materialDownLoadListApiAdd(userStore.userInfo._id, p.materialId, p.path)
+  console.log('下载成功', res)
   if (p.state === 'completed') {
     //  下载成功给与提示并重新获取下载列表刷新状态
     await materialStore.downLoadListGet(userStore.userInfo._id)

@@ -27,7 +27,7 @@ onMounted(async () => {
 <template>
   <div class="materialPage">
     <el-affix position="top" :offset="51" target=".materialPage">
-      <div style="padding: 16px; background-color: #0f0f10">
+      <div style="padding: 16px; background-color: #121212">
         <!-- 分类   -->
         <CgsCategory></CgsCategory>
         <!--  属性标签  -->

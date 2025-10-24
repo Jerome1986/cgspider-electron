@@ -67,6 +67,7 @@ onMounted(() => console.log('mounted', pageTypeStore.currentPageType, pageTypeSt
         <cgs-header></cgs-header>
       </el-header>
       <!--   主体内容   -->
+      <!--     -->
       <el-main style="margin: 0; padding: 0; border-top: 1px solid #2f2e2e; border-left: 1px solid #2f2e2e">
         <router-view></router-view>
       </el-main>

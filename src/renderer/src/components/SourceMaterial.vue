@@ -33,6 +33,7 @@ const route = useRoute()
 // 处理下载
 const handleDownload = async (item: MaterialItem) => {
   console.log(item)
+
   const saveDir = pathStore.downloadPath // 确保这是一个目录
   console.log('下载路径', pathStore.downloadPath)
   if (!saveDir || saveDir === '未设置') {
@@ -307,6 +308,7 @@ onMounted(() => {
       width: 100%;
       height: 100%;
       z-index: 999;
+      border: 1px solid red;
 
       .progress-mask {
         position: absolute;
@@ -354,7 +356,7 @@ onMounted(() => {
       font-size: 14px;
       color: #fff;
       padding: 8px;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 85%);
+      //background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 85%);
 
       .name {
         max-width: 200px;

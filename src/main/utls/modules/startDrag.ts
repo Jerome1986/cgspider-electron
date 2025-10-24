@@ -17,7 +17,7 @@ export const startDrag = (basePath: string, fileType: string, txtFile: string): 
   console.log('当前环境', app.isPackaged)
 
   const scriptsDir = resolveScriptsDir()
-  console.log('获取脚本目录', scriptsDir)
+  // console.log('获取脚本目录', scriptsDir)
 
   let dragFile: string | null = '' // 最终拖拽的文件
   let txtFilePath = '' // 资源路径文本文件
@@ -52,6 +52,7 @@ export const startDrag = (basePath: string, fileType: string, txtFile: string): 
       // 简单写成 basePath 即可
       realPath = basePath.replace(/[\\/]/g, '\\') // Windows 路径规范
     }
+    // console.log('写入', txtFilePath)
     fs.writeFileSync(txtFilePath, realPath + '\n', 'utf8')
     console.log('写入路径成功', dragFile)
   }
