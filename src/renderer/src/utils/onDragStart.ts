@@ -7,7 +7,6 @@ const pageTypeStore = usePageTypeStore()
 
 // 处理拖拽
 export const onDragStart = async (materialId: string) => {
-  window.electron.ipcRenderer.send('onDragStart', 'start')
   // 1.先判断当前素材是否为下载过的素材
   const isDownload = materialStore.isDownloaded(materialId)
   if (!isDownload) {

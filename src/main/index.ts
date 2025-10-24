@@ -66,10 +66,12 @@ function createWindow(): void {
     await shell.openPath(filePath)
   })
 
-  // 处理拖拽
+  // 处理拖拽-将拖拽对象的路径复制，并写入txt文件，从而执行脚本
   ipcMain.handle('startDrag', async (event, basePath: string, fileType: string, txtFile: string) => {
+    // 1.执行封装的拖拽函数
     const { success, dragFile, tempIcon } = startDrag(basePath, fileType, txtFile)
 
+    // 2.函数返回是否成功，且参数是否存在
     if (success && dragFile && tempIcon) {
       event.sender.startDrag({
         file: dragFile,
@@ -77,6 +79,7 @@ function createWindow(): void {
       })
       console.log('拖拽处理文件成功', dragFile)
     } else {
+      // 3.如果不存在或拖拽失败，用于处理错误
       console.log('拖拽处理文件失败')
     }
   })

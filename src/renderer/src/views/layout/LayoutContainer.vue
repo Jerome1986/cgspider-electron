@@ -4,11 +4,12 @@ import { computed, onMounted } from 'vue'
 import { menuList } from '@/config/menu'
 import { useRouter } from 'vue-router'
 import CgsHeader from '@/components/CgsHeader.vue'
-import { useCategoryStore, useLanguageStore, usePageTypeStore } from '@/stores'
+import { useCategoryStore, useLanguageStore, usePageTypeStore, useTagStore } from '@/stores'
 
 // 定义store
 const pageTypeStore = usePageTypeStore()
 const categoryStore = useCategoryStore()
+const tagStore = useTagStore()
 // 语言开关
 const languageStore = useLanguageStore()
 
@@ -24,6 +25,10 @@ const tabActiveIndex = computed(() => {
   categoryStore.setCurrentCateId('')
   categoryStore.setCurrentSubCateId('')
   categoryStore.setCurrentThirdCateId('')
+  // 重置标签
+  tagStore.selectedAittribuleTag = []
+  tagStore.selectedColorTag = []
+
   return router.currentRoute.value.path
 })
 
@@ -44,7 +49,7 @@ onMounted(() => console.log('mounted', pageTypeStore.currentPageType, pageTypeSt
         :key="item.id"
         class="tabs"
         :class="{ activeTab: tabActiveIndex === item.path }"
-        @click="$router.push({ path: item.path })"
+        @click="router.push({ path: item.path })"
       >
         <!--   图标    -->
         <i

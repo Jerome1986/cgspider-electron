@@ -24,7 +24,6 @@ export const startDrag = (basePath: string, fileType: string, txtFile: string): 
 
   switch (fileType) {
     case 'maps': {
-      // if (!textureFile) return { success: false, error: '未找到图片文件' }
       dragFile = fs.statSync(basePath).isDirectory() ? findTextureFile(basePath) : basePath
       break
     }

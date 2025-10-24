@@ -21,9 +21,11 @@ const vipProducts = ref<ProductItem[]>([])
 const productGet = async () => {
   loading.value = true
   const res = await productsGetApi()
-  console.log(res)
+  console.log('产品', res)
   coinProducts.value = res.data.filter((product: ProductItem) => product.productType === '金币充值')
   vipProducts.value = res.data.filter((product: ProductItem) => product.productType === '购买会员')
+
+  console.log('筛选产品', coinProducts.value, vipProducts.value)
 
   loading.value = false
 }
