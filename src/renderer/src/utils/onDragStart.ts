@@ -30,6 +30,7 @@ export const onDragStart = async (materialId: string) => {
       txtFile = 'matdata.txt'
       break
   }
+
   // console.log('Drag start', isDownload, basePath, fileType, txtFile)
   await window.electron.ipcRenderer.invoke('startDrag', basePath, fileType, txtFile)
 }
