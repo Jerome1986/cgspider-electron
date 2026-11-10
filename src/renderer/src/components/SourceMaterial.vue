@@ -121,14 +121,14 @@ onUnmounted(() => {
 </script>
 <template>
   <SkeletonSourceMaterial
-    v-if="materialStore.loading"
+    v-if="materialStore.loading && !materialStore.materialList.length"
     :items="8"
     :size="itemSize"
     :throttle="{ leading: 300, trailing: 200 }"
   />
-  <div v-else class="sourceMaterial">
+  <div v-show="materialStore.materialList.length" class="sourceMaterial" :aria-busy="materialStore.loading">
     <div
-      v-for="item in materialStore.materialList"
+      v-for="(item, index) in materialStore.materialList"
       :key="item._id"
       class="materialItem"
       draggable="true"
@@ -136,7 +136,7 @@ onUnmounted(() => {
     >
       <!-- 使用 el-image 替换背景图 -->
       <el-image
-        :lazy="true"
+        :lazy="index >= 8"
         class="material-image"
         :src="item.cover_url"
         :zoom-rate="1.2"

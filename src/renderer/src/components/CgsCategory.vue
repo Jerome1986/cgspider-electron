@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { materialListFilter } from '@/composables/materialListFilter'
 import {
   useCategoryStore,
   useLanguageStore,
@@ -46,21 +47,10 @@ const handleChangeCate = async (cateId: string) => {
 
   // 存入当前的一级分类ID
   categoryStore.setCurrentCateId(cateId)
-  // 根据一级分类渲染二级分类
-  await categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 2)
-
-  // 渲染素材
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    materialStore.download,
-    materialStore.collect,
-    userStore.userInfo._id
-  )
+  await Promise.allSettled([
+    categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 2),
+    materialListFilter()
+  ])
 }
 
 // 二级分类点击全部
@@ -89,20 +79,10 @@ const handleChangeSubCate = async (cateId: string) => {
 
   // 存入当前的二级分类ID
   categoryStore.setCurrentSubCateId(cateId)
-  // 根据二级分类ID获取三级分类
-  await categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 3)
-  // 获取对应素材
-  await materialStore.materialListFilterGet(
-    pageTypeStore.currentPageType,
-    categoryStore.currentCateId,
-    categoryStore.currentSubCateId,
-    categoryStore.currentThirdCateId,
-    tagStore.selectedAittribuleIds,
-    tagStore.selectedColorIds,
-    materialStore.download,
-    materialStore.collect,
-    userStore.userInfo._id
-  )
+  await Promise.allSettled([
+    categoryStore.categoryListGet(pageTypeStore.currentPageType, cateId, 3),
+    materialListFilter()
+  ])
 }
 
 // 三级分类全部

@@ -1,3 +1,4 @@
+import { createQueryCache } from '@/utils/queryCache'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { categoryListGetApi } from '@/api/category'
@@ -18,28 +19,19 @@ export const useCategoryStore = defineStore(
     const cateList = ref<Category[]>([]) //一级分类
     const subCateList = ref<Category[]>([]) //二级分类
     const thirdCateList = ref<Category[]>([]) //三级分类
-    // 获取树级分类接口
-    const categoryListGet = async (type: string, parentId: string | null = null, level: number = 1) => {
-      switch (level) {
-        case 1: {
-          const res = await categoryListGetApi(type, parentId)
-          console.log('分类结果', res.data)
-          cateList.value = res.data
-          break
-        }
-        case 2: {
-          const res = await categoryListGetApi(type, parentId)
-          console.log('分类结果', res.data)
-          subCateList.value = res.data
-          break
-        }
-        case 3: {
-          const res = await categoryListGetApi(type, parentId)
-          console.log('分类结果', res.data)
-          thirdCateList.value = res.data
-          break
-        }
-      }
+    const cache = createQueryCache<Category[]>(100)
+    const versions = [0, 0, 0, 0]
+    // 相同分类读取复用缓存；过时响应不能覆盖后来选中的分类。
+    const categoryListGet = async (type: string, parentId: string | null = null, level = 1) => {
+      const version = ++versions[level]
+      const data = await cache.get(
+        JSON.stringify([type, parentId]),
+        async () => (await categoryListGetApi(type, parentId)).data
+      )
+      if (version !== versions[level]) return
+      if (level === 1) cateList.value = data
+      if (level === 2 && currentCateId.value === parentId) subCateList.value = data
+      if (level === 3 && currentSubCateId.value === parentId) thirdCateList.value = data
     }
 
     return {

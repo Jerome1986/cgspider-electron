@@ -5,22 +5,10 @@ import CgsColorTag from '@/components/CgsColorTag.vue'
 import CgsFilter from '@/components/CgsFilter.vue'
 import SourceMaterial from '@/components/SourceMaterial.vue'
 import { onMounted } from 'vue'
-import { useMaterialStore, useUserStore } from '@/stores'
 import { materialListFilter } from '@/composables/materialListFilter'
 
-// 定义 store
-const materialStore = useMaterialStore()
-const userStore = useUserStore()
-
-onMounted(async () => {
-  await Promise.all([
-    // 渲染素材
-    materialListFilter(),
-    //   获取收藏列表
-    materialStore.materialLoveListGet(userStore.userInfo._id),
-    // 获取下载列表
-    materialStore.downLoadListGet(userStore.userInfo._id)
-  ])
+onMounted(() => {
+  void materialListFilter()
 })
 </script>
 

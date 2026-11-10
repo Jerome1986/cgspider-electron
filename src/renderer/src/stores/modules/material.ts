@@ -1,3 +1,5 @@
+import { createQueryCache } from '@/utils/queryCache'
+import type { MaterialPageResult } from '@/types/Material'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useUserStore } from './user'
@@ -9,9 +11,7 @@ import { materialDownLoadListApiGet, materialListGetApi, materialListLoveGetApi 
 export const useMaterialStore = defineStore(
   'material',
   () => {
-    // 加载骨架屏防抖
-    const MIN_MS = 300
-    const start = Date.now()
+    const listCache = createQueryCache<MaterialPageResult>()
     const loading = ref<boolean>(true)
     // 本地路径仅按当前账号保存，不再从服务端下载历史推断“本机有”。
     const localDownloads = ref<Record<string, Record<string, string>>>({})
@@ -23,9 +23,16 @@ export const useMaterialStore = defineStore(
       const owner = useUserStore().userInfo._id
       const rows = Object.entries(localDownloads.value[owner] ?? {})
       const valid: string[] = []
-      for (const [id, filePath] of rows) {
-        if (await window.electron.ipcRenderer.invoke('path-exists', filePath)) valid.push(id)
-        else delete localDownloads.value[owner][id]
+      // 分批并行检查，避免逐条IPC阻塞，也限制同时发送的请求数。
+      for (let offset = 0; offset < rows.length; offset += 8) {
+        const batch = rows.slice(offset, offset + 8)
+        const exists = await Promise.all(
+          batch.map(([, path]) => window.electron.ipcRenderer.invoke('path-exists', path))
+        )
+        batch.forEach(([id, path], index) => {
+          if (exists[index]) valid.push(id)
+          else if (localDownloads.value[owner]?.[id] === path) delete localDownloads.value[owner][id]
+        })
       }
       return valid
     }
@@ -33,6 +40,7 @@ export const useMaterialStore = defineStore(
     let requestVersion = 0
     const clearSession = () => {
       requestVersion++
+      listCache.clear()
       materialList.value = []
       materialTotal.value = 0
       materialLoveList.value = []
@@ -72,24 +80,43 @@ export const useMaterialStore = defineStore(
       const version = ++requestVersion
       loading.value = true
       try {
-        const res = await materialListGetApi(
+        const page = pageNum.value
+        const size = Math.min(100, pageSize.value)
+        const search = keyword.value
+        const load = async () =>
+          (
+            await materialListGetApi(
+              type,
+              top_id,
+              sub_id,
+              third_id,
+              aittributeTags,
+              colorTags,
+              isDownloaded,
+              isLoved,
+              user_id,
+              page,
+              size,
+              search
+            )
+          ).data
+        // 收藏与本机文件筛选读取实时状态，普通列表缓存按账号隔离。
+        const key = JSON.stringify([
+          user_id,
           type,
           top_id,
           sub_id,
           third_id,
-          aittributeTags,
-          colorTags,
-          isDownloaded,
-          isLoved,
-          user_id,
-          pageNum.value,
-          Math.min(100, pageSize.value),
-          keyword.value
-        )
+          [...aittributeTags].sort(),
+          [...colorTags].sort(),
+          page,
+          size,
+          search
+        ])
+        const data = isDownloaded || isLoved ? await load() : await listCache.get(key, load)
         if (version !== requestVersion) return
-        materialList.value = res.data.list
-        console.log('素材', materialList.value)
-        materialTotal.value = res.data.total
+        materialList.value = data.list
+        materialTotal.value = data.total
       } catch (error) {
         if (version === requestVersion) {
           materialList.value = []
@@ -97,8 +124,6 @@ export const useMaterialStore = defineStore(
         }
         console.error(error)
       } finally {
-        const elapsed = Date.now() - start
-        if (elapsed < MIN_MS) await new Promise((r) => setTimeout(r, MIN_MS - elapsed))
         if (version === requestVersion) loading.value = false
       }
     }
@@ -142,6 +167,7 @@ export const useMaterialStore = defineStore(
       const res = await materialDownLoadListApiGet(userId)
       if (useUserStore().userInfo._id !== userId) return
       const localIds = await localMaterialIds()
+      if (useUserStore().userInfo._id !== userId) return
       downLoadList.value = localIds.map((id) => ({
         _id: res.data.find((row) => row.material_id === id)?._id ?? id,
         user_id: userId,

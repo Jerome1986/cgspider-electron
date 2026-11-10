@@ -20,7 +20,8 @@ watch(
         const current = await userIdInfoGetApi()
         if (user.userInfo.token !== token) return
         user.setUserInfo(current.data)
-        await Promise.all([
+        // 辅助状态不阻塞素材页面显示。
+        void Promise.allSettled([
           material.materialLoveListGet(user.userInfo._id),
           material.downLoadListGet(user.userInfo._id)
         ])

@@ -1,3 +1,4 @@
+import { createQueryCache } from '@/utils/queryCache'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { TagAittribuleItem, TagColorItem } from '@/types/Tags'
@@ -6,15 +7,23 @@ import { attributeTagGetApi, colorTagGetApi } from '@/api/tag'
 export const useTagStore = defineStore(
   'cgs-tags',
   () => {
+    const attributeCache = createQueryCache<TagAittribuleItem[]>(1)
+    const colorCache = createQueryCache<TagColorItem[]>(1)
+    let attributeVersion = 0
+    let colorVersion = 0
     //  属性标签
     const aittributeTag = ref<TagAittribuleItem[]>([])
     // 当前选择的属性标签
     const selectedAittribuleTag = ref<TagAittribuleItem[]>([])
     // 获取属性标签
     const aittribuleTagGet = async (type: string) => {
-      const res = await attributeTagGetApi(type)
-      aittributeTag.value = res.data.map((item) => ({ ...item, isSelected: false }))
-      console.log('标签结果', aittributeTag.value)
+      const version = ++attributeVersion
+      const data = await attributeCache.get('attributes', async () => (await attributeTagGetApi(type)).data)
+      if (version !== attributeVersion) return
+      aittributeTag.value = data.map((item) => ({
+        ...item,
+        isSelected: selectedAittribuleTag.value.some((tag) => tag._id === item._id)
+      }))
     }
 
     // 将属性标签的某一项设置为已选择
@@ -40,9 +49,13 @@ export const useTagStore = defineStore(
     // 当前选择的属性标签
     const selectedColorTag = ref<TagColorItem[]>([])
     const getColorTagList = async (type: string) => {
-      const res = await colorTagGetApi(type)
-      console.log('获取', res.data)
-      colorList.value = res.data.map((item) => ({ ...item, isSelected: false }))
+      const version = ++colorVersion
+      const data = await colorCache.get('colors', async () => (await colorTagGetApi(type)).data)
+      if (version !== colorVersion) return
+      colorList.value = data.map((item) => ({
+        ...item,
+        isSelected: selectedColorTag.value.some((tag) => tag._id === item._id)
+      }))
     }
 
     // 将颜色标签的某一项设置为已选择
