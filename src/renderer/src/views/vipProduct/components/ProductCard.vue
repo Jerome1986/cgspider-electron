@@ -75,10 +75,12 @@ const languageStore = useLanguageStore()
 
         <!-- 操作区 -->
         <div class="btn-wrapper">
-          <el-button type="primary" class="buy-btn" @click="handleBuy(item)">{{
-            languageStore.gt('立即充值', 'Recharge now')
+          <el-button type="primary" class="buy-btn" disabled @click="handleBuy(item)">{{
+            languageStore.gt('购买暂未开放', 'Purchases unavailable')
           }}</el-button>
-          <div class="cta-hint">{{ languageStore.gt('官方直充 · 到账更快', 'Official top-up · Faster arrival') }}</div>
+          <div class="cta-hint">
+            {{ languageStore.gt('暂未开放在线充值购买', 'Online purchases are not available yet') }}
+          </div>
         </div>
       </div>
     </div>

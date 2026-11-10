@@ -1,6 +1,8 @@
-// 素材项类型
+import type { AuthorizedFile } from '../../../shared/download'
+
+/** 素材展示项，公开列表不包含可直接下载的原始文件地址。 */
 export interface MaterialItem {
-  /** 唯一标识 (MongoDB _id) */
+  /** 服务端整数编号序列化为字符串 */
   _id: string
   /** 中文名或原始名 */
   name: string
@@ -9,7 +11,7 @@ export interface MaterialItem {
   /** 封面图地址 */
   cover_url: string
   /** 文件下载地址数组 */
-  files_url: string
+  files_url: string | string[]
   /** 一级分类ID */
   top_id?: string
   /** 二级分类ID */
@@ -34,13 +36,20 @@ export interface MaterialItem {
   updateAt?: string
 }
 
-// 素材分页返回类型
+/** 素材分页返回类型。 */
 export interface MaterialPageResult {
+  /** 当前页素材 */
   list: MaterialItem[]
+  /** 同筛选条件下素材总数 */
   total: number
-  pageNum: number
+  /** 当前页码 */
+  currentPage: number
+  /** 每页条数 */
   pageSize: number
-  totalPage: number
+  /** 匹配素材中的属性标签 */
+  tags: string[]
+  /** 匹配素材中的颜色 */
+  colors: string[]
 }
 
 // 素材收藏返回类型
@@ -63,4 +72,16 @@ export interface MaterialDownLoad {
   material_id: string
   /** 用户对应下载素材本地的保存路径--用于后期点击直接打开文件 */
   file_path: string
+}
+
+/** 服务端下载授权，不包含可绕过身份验证的原始文件地址。 */
+export interface DownloadGrant {
+  /** 授权编号 */
+  grantId: string
+  /** 是否复用原授权 */
+  reused: boolean
+  /** 当前金币 */
+  coins: number
+  /** 全部文件的认证下载路径与文件名 */
+  files: AuthorizedFile[]
 }

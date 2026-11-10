@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import {
@@ -14,8 +14,6 @@ import {
 } from '@/utils/header'
 import { usePathStore, useLanguageStore } from '@/stores'
 import { formatTimestamp } from '@/utils/formatTimestamp'
-import { calcMembershipLeft } from '@/utils/calcMembershipLeft'
-import { vipEndTimePutApi } from '@/api/user'
 
 // 定义store
 const userStore = useUserStore()
@@ -60,20 +58,7 @@ const handleMenuItem = (action: string) => {
   showMenu.value = false
 }
 
-// 页面挂载完毕
-onMounted(async () => {
-  const vipEndInfo = calcMembershipLeft(userStore.userInfo.membershipExpiry)
-  if (vipEndInfo.expired && userStore.userInfo.membershipType !== 'free') {
-    // 1. 前端立即更新用户身份，避免 UI 闪烁
-    userStore.userInfo.membershipType = 'free'
-    // 2. 异步通知后端
-    try {
-      await vipEndTimePutApi(userStore.userInfo._id)
-    } catch (e) {
-      console.error('同步会员状态失败', e)
-    }
-  }
-})
+// 会员与每日额度以服务端实时状态为准，客户端不再调用旧到期写入接口。
 </script>
 
 <template>
@@ -105,7 +90,7 @@ onMounted(async () => {
       </div>
       <div class="downLimit">{{ languageStore.gt('剩余次数', 'Remaining times') }}：{{ userStore.remainingUses }}</div>
       <!-- 会员到期时间  -->
-      <div v-if="userStore.userInfo.role === 'vip'" class="vipEndTime">
+      <div v-if="userStore.userInfo.membershipType === 'annual'" class="vipEndTime">
         {{ languageStore.gt('会员到期时间', 'endTime') }}：{{ formatTimestamp(userStore.userInfo.membershipExpiry!) }}
       </div>
     </div>

@@ -2,7 +2,15 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { changeWindow, DownloadPayload, handleDownload, quitWindow, selectDownloadPath, toggleOnTop } from '@main/utls'
+import {
+  changeWindow,
+  DownloadPayload,
+  handleDownload,
+  hasLocalFiles,
+  quitWindow,
+  selectDownloadPath,
+  toggleOnTop
+} from '@main/utls'
 import { openPaymentWindow } from '@main/window/payWindow'
 import { startDrag } from '@main/utls/modules/startDrag'
 
@@ -54,11 +62,15 @@ function createWindow(): void {
 
   // 处理下载
   ipcMain.handle('download-file', async (_, payload: DownloadPayload) => {
-    console.log('开始下载', payload)
     // getFocusedWindow 为获取当前正在操作的焦点窗口
     const win = BrowserWindow.getFocusedWindow() || mainWindow
-    return handleDownload(win!, payload)
+    try {
+      return await handleDownload(win!, payload)
+    } catch (error) {
+      return { ok: false, message: error instanceof Error ? error.message : '下载失败，请重试' }
+    }
   })
+  ipcMain.handle('path-exists', (_, target: string) => hasLocalFiles(target))
 
   // 打开在本地已下载的文件夹
   ipcMain.handle('show-file', async (_, filePath: string) => {

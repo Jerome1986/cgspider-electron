@@ -1,28 +1,22 @@
 import { request } from '@/utils/request'
-import { LoginResponse } from '@/types/Users'
+import type { LoginResponse, UserProfile, DownloadStatus } from '@/types/Users'
 
-/**
- * 根据用户id获取用户信息
- * /userById
- * @param userId - 用户id
- */
-export const userIdInfoGetApi = (userId: string) => {
-  return request<LoginResponse>({
-    method: 'GET',
-    url: '/userById',
-    params: { userId }
-  })
-}
-
-/**
- * 会员到期
- * /vipEndTime
- * @param userId - 用户ID
- */
-export const vipEndTimePutApi = (userId: string) => {
-  return request({
-    method: 'POST',
-    url: '/vipEndTime',
-    params: { userId }
-  })
+/** 当前身份由令牌确认，不再通过任意用户ID读取。 */
+export const userIdInfoGetApi = async (_userId = '') => {
+  const [info, quota] = await Promise.all([
+    request<UserProfile>({ url: '/api/user-web-get' }),
+    request<DownloadStatus>({ url: '/api/user-download-status' })
+  ])
+  const role = info.data.role
+  const membershipType: LoginResponse['membershipType'] =
+    role === 'permanent' ? 'permanent' : quota.data.member ? 'annual' : 'free'
+  return {
+    ...info,
+    data: {
+      ...info.data,
+      membershipExpiry: info.data.endDate,
+      membershipType,
+      dailyDownloadsUsed: quota.data.dailyUsed
+    }
+  }
 }

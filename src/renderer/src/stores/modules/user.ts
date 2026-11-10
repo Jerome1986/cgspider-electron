@@ -12,12 +12,13 @@ export const useUserStore = defineStore(
 
     // 通过计算属性计算剩余的下载次数
     const remainingUses = computed(() => {
-      return userInfo.value.dailyDownloadLimit - userInfo.value.dailyDownloadsUsed
+      return userInfo.value.membershipType === 'free'
+        ? 0
+        : Math.max(0, userInfo.value.dailyDownloadLimit - userInfo.value.dailyDownloadsUsed)
     })
 
     // 设置用户信息
-    const setUserInfo = (value: LoginResponse): void => {
-      console.log('setUserInfo', value)
+    const setUserInfo = (value: Partial<LoginResponse>): void => {
       userInfo.value = { ...userInfo.value, ...value }
     }
 

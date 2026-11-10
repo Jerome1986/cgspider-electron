@@ -1,138 +1,56 @@
 import { request } from '@/utils/request'
-import { MaterialDownLoad, MaterialLoveResult, MaterialPageResult } from '@/types/Material'
-import { addResult } from '@/types/Global '
-import { updateDownloadInfo } from '@/types/Users'
+import { useTagStore, useMaterialStore } from '@/stores'
+import type { MaterialDownLoad, MaterialLoveResult, MaterialPageResult, DownloadGrant } from '@/types/Material'
 
-/**
- * 综合筛选素材
- * /material-filterGet
- * @param type - 页面类型
- * @param top_id - 一级分类ID
- * @param sub_id - 二级分类ID
- * @param third_id - 三级分类ID
- * @param aittributeTags - 所选择的属性标签ID
- * @param colorTags - 所选择的颜色标签ID
- * @param isDownloaded - 是否勾选了已下载
- * @param isLoved - 是否勾选了已收藏
- * @param user_id - 当前用户ID
- * @param pageNum - 页码
- * @param pageSize - 条数
- */
-export const materialListGetApi = (
+/** 将页面筛选映射为cgs-api契约，多选属性传名称，颜色传色值。 */
+export const materialListGetApi = async (
   type: string,
   top_id: string,
   sub_id: string,
   third_id: string,
-  aittributeTags: string[],
-  colorTags: string[],
-  isDownloaded: boolean,
-  isLoved: boolean,
-  user_id: string,
-  pageNum: number = 1,
-  pageSize: number = 10
+  attributeIds: string[],
+  colors: string[],
+  local: boolean,
+  favorites: boolean,
+  _userId: string,
+  pageNum = 1,
+  pageSize = 10,
+  keyword = ''
 ) => {
-  return request<MaterialPageResult>({
-    method: 'GET',
-    url: '/material-filterGet',
-    params: {
-      type,
-      top_id,
-      sub_id,
-      third_id,
-      aittributeTags,
-      colorTags,
-      isDownloaded,
-      isLoved,
-      user_id,
-      pageNum,
-      pageSize
-    }
-  })
+  const tags = useTagStore()
+    .aittributeTag.filter((tag) => attributeIds.includes(tag._id))
+    .map((tag) => tag.name)
+  const query = {
+    pageType: type,
+    cateId: third_id || sub_id || top_id || 'NEW',
+    tags,
+    colors,
+    searchVal: keyword,
+    pageNum,
+    pageSize
+  }
+  if (local || favorites) {
+    const localIds = local ? await useMaterialStore().localMaterialIds() : undefined
+    return request<MaterialPageResult>({
+      url: '/api/user-material-filter',
+      method: 'POST',
+      data: { ...query, onlyFavorites: favorites, ...(localIds ? { localIds } : {}) }
+    })
+  }
+  return request<MaterialPageResult>({ url: '/api/filterMaterial', params: query })
 }
-
-/**
- * 收藏素材接口
- * /user-loveList-add
- * @param user_id
- * @param material_id
- */
-export const materialListLoveApi = (user_id: string, material_id: string) => {
-  return request<MaterialLoveResult | null>({
+/** 收藏设置明确目标状态；isLove沿用页面约定，true表示尚未收藏。 */
+export const materialListLoveApi = (_userId: string, material_id: string) =>
+  request<{ collected: boolean }>({
+    url: '/api/user-loveList-add',
     method: 'POST',
-    url: '/user-loveList-add',
-    data: { user_id, material_id }
+    data: { material_id, collected: useMaterialStore().isLove(material_id) }
   })
-}
-
-/**
- * 获取用户的收藏列表
- * @param user_id - 当前用户ID
- */
-export const materialListLoveGetApi = (user_id: string) => {
-  return request<MaterialLoveResult[]>({
-    method: 'GET',
-    url: '/user-loveList-get',
-    params: { user_id }
-  })
-}
-
-/**
- * 根据关键词搜索素材
- * /material-searchWeb
- * @param pagesType - 页面类型
- * @param searchVal - 搜索值
- * @param pageNum - 页码
- * @param pageSize - 条数
- */
-export const materialListSearchKeywordsApi = (
-  pagesType: string,
-  searchVal: string,
-  pageNum: number = 1,
-  pageSize: number = 10
-) => {
-  return request<MaterialPageResult>({
-    method: 'POST',
-    url: '/material-searchWeb',
-    data: { pagesType, searchVal, pageNum, pageSize }
-  })
-}
-
-/**
- * 获取用户的下载列表
- * @param user_id
- */
-export const materialDownLoadListApiGet = (user_id: string) => {
-  return request<MaterialDownLoad[]>({
-    method: 'GET',
-    url: '/user-downloadList-get',
-    params: { user_id }
-  })
-}
-
-/**
- * 添加到下载列表
- * /user-add-download
- * @param user_id - 用户ID
- * @param material_id - 素材ID
- * @param file_path - 当前素材本地保存路径
- */
-export const materialDownLoadListApiAdd = (user_id: string, material_id: string, file_path: string) => {
-  return request<addResult>({
-    method: 'POST',
-    url: '/user-add-download',
-    data: { user_id, material_id, file_path }
-  })
-}
-
-/**
- * 用户下载时验证--记录今日下载次数/扣除金币
- * /user-downloadsUsed
- * @param userId - 当前用户ID
- */
-export const downloadVerifyApi = (userId: string) => {
-  return request<updateDownloadInfo>({
-    method: 'POST',
-    url: '/user-downloadsUsed',
-    data: { userId }
-  })
-}
+export const materialListLoveGetApi = (_userId: string) =>
+  request<MaterialLoveResult[]>({ url: '/api/user-loveList-get' })
+export const materialDownLoadListApiGet = (_userId: string) =>
+  request<MaterialDownLoad[]>({ url: '/api/user-downloadList-get' })
+export const materialDownLoadListApiAdd = (_userId: string, material_id: string, _filePath: string) =>
+  request({ url: '/api/user-add-download', method: 'POST', data: { material_id } })
+export const downloadVerifyApi = (material_id: string) =>
+  request<DownloadGrant>({ url: '/api/user-download-authorize', method: 'POST', data: { material_id } })

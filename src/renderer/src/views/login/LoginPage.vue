@@ -65,7 +65,7 @@ const validateConfirm = (_: unknown, value: string, callback: (err?: Error) => v
 const registerRules = ref<FormRules<RegisterForm>>({
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { pattern: /^[A-Za-z][A-Za-z0-9]{5,20}$/, message: '长度为 6-21 位且英文开头加数字', trigger: 'blur' }
+    { pattern: /^\S{6,12}$/, message: '用户名为6至12位且不含空白字符', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -93,7 +93,6 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     await formEl.validate(async (valid, fields) => {
       if (valid) {
         const res = await LoginApi(form.value.username, form.value.password)
-        console.log('login submit!', res)
         if (res.code === 200) {
           //   todo  登录成功----存储用户信息----跳转主页面
           userStore.setUserInfo(res.data)
@@ -122,7 +121,6 @@ const submitRegister = async (formEl: FormInstance | undefined) => {
     await formEl.validate(async (valid, fields) => {
       if (valid) {
         const res = await registerApi(registerForm.value.username, registerForm.value.password)
-        console.log('register submit!', res, registerForm.value)
         if (res.code === 200) {
           //   todo 注册成功---存储信息---直接登录并跳转首页
           userStore.setUserInfo(res.data)

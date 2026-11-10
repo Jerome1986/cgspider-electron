@@ -14,8 +14,6 @@ const languageStore = useLanguageStore()
 const handleSizeChange = async (size: number) => {
   materialStore.setPageSize(size)
   materialStore.setPageNum(1)
-  searchValue.value = ''
-  isSearch.value = false
 
   // 渲染数据
   await materialListFilter()
@@ -37,6 +35,7 @@ const handleCurrentChange = async (current: number) => {
 const searchValue = ref('')
 // 清空搜索
 const handleClear = async () => {
+  materialStore.keyword = ''
   searchValue.value = ''
   isSearch.value = false
   materialStore.setPageNum(1)
@@ -56,6 +55,7 @@ const searchGetMaterial = async () => {
 
 // 处理筛选
 const changeFilter = async (value: CheckboxValueType[]) => {
+  materialStore.keyword = ''
   materialStore.setCollect(value.includes('collect'))
   materialStore.setDownload(value.includes('download'))
 
@@ -72,6 +72,7 @@ const changeFilter = async (value: CheckboxValueType[]) => {
 
 // 重置筛选
 const resetFilter = async () => {
+  materialStore.keyword = ''
   console.log('重置筛选')
   materialStore.setPageNum(1) // 重置页码
   materialStore.checkListFilter = [] // 重置下载/收藏筛选组
@@ -79,6 +80,7 @@ const resetFilter = async () => {
   materialStore.setCollect(false) // 重置是否收藏
   materialStore.showText = false // 重置显示文本
   searchValue.value = '' // 重置搜索框
+  isSearch.value = false
   // 渲染数据
   await materialListFilter()
 }
@@ -93,7 +95,7 @@ const resetFilter = async () => {
         v-model:page-size="materialStore.pageSize"
         background
         size="small"
-        :page-sizes="[10, 50, 80, 100, 200]"
+        :page-sizes="[10, 50, 80, 100]"
         layout="total, sizes, prev, pager, next"
         :total="materialStore.materialTotal"
         @size-change="handleSizeChange"

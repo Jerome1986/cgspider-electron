@@ -3,6 +3,8 @@ productName: cgspider
 directories:
   buildResources: build
 files:
+  - '!tests/**'
+  - '!.integration-*'
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'

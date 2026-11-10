@@ -1,90 +1,45 @@
 import { useUserStore } from '@/stores'
-import axios from 'axios'
+import axios, { isAxiosError } from 'axios'
 import router from '@/router'
 import { ElMessage } from 'element-plus'
-import type { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { isAxiosError } from 'axios'
+import type { AxiosRequestConfig } from 'axios'
+import type { ApiResult } from '@/types/Api'
 
-// 基地址（优先环境变量，其次 /api 代理）
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+const baseURL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+const messageText = (value: unknown): string =>
+  Array.isArray(value)
+    ? value.filter((item) => typeof item === 'string').join('；')
+    : typeof value === 'string'
+      ? value
+      : '网络连接失败，请稍后重试'
+export const getErrorMessage = (error: unknown): string =>
+  isAxiosError(error)
+    ? messageText(error.response?.data?.message || error.message)
+    : error instanceof Error
+      ? error.message
+      : messageText(error)
 
-// 返回数据类型
-type Data<T> = {
-  code: number
-  message: string
-  data: T
-}
-
-function safeShowMessage(msg?: string) {
-  if (!msg || !msg.trim()) return
-  ElMessage({
-    type: 'error',
-    message: msg,
-    duration: 2000,
-    grouping: true
-  })
-}
-
-// 错误信息提取
-function getErrorMessage(error: unknown): string {
-  if (isAxiosError(error)) {
-    return error.response?.data?.message || error.message || '服务异常'
-  }
-  if (error instanceof Error) {
-    return error.message
-  }
-  return '服务异常'
-}
-
-// 请求函数
-export const request = async <T>(options: AxiosRequestConfig): Promise<Data<T>> => {
-  const userStore = useUserStore()
-
-  const config: AxiosRequestConfig = {
-    ...options,
-    url: options.url && !/^https?:\/\//i.test(options.url) ? baseURL + options.url : options.url,
-    timeout: 10000,
-    headers: {
-      ...(options.headers || {}),
-      'source-client': 'admin-web',
-      ...(userStore.userInfo.token ? { Authorization: userStore.userInfo.token } : {})
-    },
-    validateStatus: () => true // axios 不拦截，交给我们自己处理
-  }
-
+export const request = async <T>(options: AxiosRequestConfig): Promise<ApiResult<T>> => {
+  const user = useUserStore()
+  const token = user.userInfo.token
   try {
-    const res: AxiosResponse<Data<T>> = await axios.request<Data<T>>(config)
-    const { status, data } = res
-
-    // 先判断 HTTP 状态
-    if (status >= 500) {
-      const msg = data?.message || '服务器开小差了'
-      safeShowMessage(msg)
-      throw new Error(msg)
-    }
-
-    // 业务状态判断
-    if (!data || data.code !== 200) {
-      const msg = data?.message || '请求错误'
-
-      // 401 未登录/过期
-      if (data?.code === 401 || status === 401) {
-        userStore.clearToken()
-        await router.push('/login')
-      }
-
-      safeShowMessage(msg)
-      throw new Error(msg)
-    }
-
-    // 一切正常
-    return data
+    const response = await axios.request<ApiResult<T>>({
+      ...options,
+      baseURL,
+      timeout: 30000,
+      paramsSerializer: { indexes: null },
+      headers: { ...options.headers, ...(token ? { Authorization: token } : {}) }
+    })
+    if (response.data?.code !== 200) throw new Error(messageText(response.data?.message))
+    return response.data
   } catch (error) {
-    // throw new Error(msg)
-    console.error(error)
+    // 旧账号请求的401不得清理后来登录的新身份。
+    if (isAxiosError(error) && error.response?.status === 401 && token && user.userInfo.token === token) {
+      user.clearToken()
+      if (router.currentRoute.value.path !== '/login') await router.replace('/login')
+    }
+    ElMessage({ type: 'error', message: getErrorMessage(error), grouping: true })
+    throw error
   }
-
-  return {} as Data<T>
 }
-
-export { baseURL, getErrorMessage }
+export { baseURL }

@@ -1,7 +1,7 @@
 // types/user.ts
 
 // 用户角色类型
-export type UserRole = 'admin' | 'user' | 'vip'
+export type UserRole = 'admin' | 'user' | 'vip' | 'annual' | 'permanent'
 
 // 用户状态类型
 export type UserStatus = 0 | 1 // 0: 禁用, 1: 启用
@@ -13,7 +13,7 @@ export type MembershipType = 'annual' | 'permanent' | 'free'
 export interface LoginResponse {
   /** JWT 认证令牌，用于后续接口鉴权 */
   token?: string
-  /** MongoDB 唯一标识符 */
+  /** 服务端整数编号序列化为字符串 */
   _id: string
   /** 用户名，用于登录和显示 */
   username: string
@@ -37,6 +37,19 @@ export interface LoginResponse {
   membershipExpiry: string | Date | null
   /** 会员类型，决定权限和限制 */
   membershipType: MembershipType
+}
+
+/** 登录或当前用户接口的原始资料，会员剩余额度另从状态接口读取。 */
+export type UserProfile = Omit<LoginResponse, 'membershipType' | 'membershipExpiry' | 'dailyDownloadsUsed'> & {
+  /** 会员到期时间，永久会员可为空 */
+  endDate: string | null
+}
+/** 服务端实时下载状态。 */
+export interface DownloadStatus {
+  /** 今日已使用额度 */
+  dailyUsed: number
+  /** 当前是否享有会员权益 */
+  member: boolean
 }
 
 export interface updateDownloadInfo {

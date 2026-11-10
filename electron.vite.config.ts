@@ -40,7 +40,7 @@ export default defineConfig({
     server: {
       proxy: {
         '/api': {
-          target: 'https://etnrve3alw.gzg.sealos.run',
+          target: 'http://localhost:3000',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '') // 移除 /api 前缀
         }

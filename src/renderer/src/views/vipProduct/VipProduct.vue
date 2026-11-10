@@ -5,12 +5,7 @@ import { productsGetApi } from '@/api/product'
 import ProductCard from './components/ProductCard.vue'
 import { coins, membership } from '@/views/vipProduct/configData'
 import SkeletonScreen from '@/views/vipProduct/components/SkeletonScreen.vue'
-import { payOrderApi } from '@/api/order'
-import { useUserStore } from '@/stores'
-import { userIdInfoGetApi } from '@/api/user'
-
-// 定义store
-const userStore = useUserStore()
+import { ElMessage } from 'element-plus'
 
 // 加载
 const loading = ref(false)
@@ -20,46 +15,32 @@ const coinProducts = ref<ProductItem[]>([])
 const vipProducts = ref<ProductItem[]>([])
 const productGet = async () => {
   loading.value = true
-  const res = await productsGetApi()
-  console.log('产品', res)
-  coinProducts.value = res.data.filter((product: ProductItem) => product.productType === '金币充值')
-  vipProducts.value = res.data.filter((product: ProductItem) => product.productType === '购买会员')
+  try {
+    const res = await productsGetApi()
+    console.log('产品', res)
+    coinProducts.value = res.data.filter((product: ProductItem) => product.productType === '金币充值')
+    vipProducts.value = res.data.filter((product: ProductItem) => product.productType === '购买会员')
 
-  console.log('筛选产品', coinProducts.value, vipProducts.value)
-
-  loading.value = false
+    console.log('筛选产品', coinProducts.value, vipProducts.value)
+  } finally {
+    loading.value = false
+  }
 }
 
 // 处理购买金币
 const handleCoinsBuy = async (item: ProductItem) => {
   console.log(item)
-  const res = await payOrderApi(userStore.userInfo._id, item._id)
-  window.electron.ipcRenderer.invoke('creatOrder', res.data.pay_url)
-  console.log(' 支付', res)
+  ElMessage.info('充值购买暂未开放')
 }
 
 // 处理购买会员
 const handleVipBuy = async (item: ProductItem) => {
   console.log('办理会员', item)
-  const res = await payOrderApi(userStore.userInfo._id, item._id)
-  window.electron.ipcRenderer.invoke('creatOrder', res.data.pay_url)
+  ElMessage.info('充值购买暂未开放')
 }
 
 onMounted(async () => {
-  await productGet()
-  // 支付成功处理
-  const handler = async (_, status: string) => {
-    // SUCCESS / FAIL ...
-    console.log('payment-status:', status)
-    if (status === 'success') {
-      //   重新拉取用户信息
-      const res = await userIdInfoGetApi(userStore.userInfo._id)
-      console.log('更新后的信息', res)
-      userStore.setUserInfo(res.data)
-    }
-  }
-  // 接收支付状态消息
-  window.electron.ipcRenderer.on('payment-status', handler)
+  await productGet().catch(() => {})
 })
 </script>
 

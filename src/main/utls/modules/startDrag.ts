@@ -50,7 +50,11 @@ export const startDrag = (basePath: string, fileType: string, txtFile: string): 
     if (fileType === 'model' || fileType === 'material' || fileType === 'lighting') {
       // 你可以根据需要在这里处理 basePath -> 具体文件路径
       // 简单写成 basePath 即可
-      realPath = basePath.replace(/[\\/]/g, '\\') // Windows 路径规范
+      const extensions = fileType === 'model' ? ['.max'] : fileType === 'material' ? ['.mat'] : ['.ies']
+      // 新授权可包含多个文件包；解压目录独立，传递实际资源所在目录给既有脚本。
+      const resource = findResourceFile(basePath, extensions)
+      if (!resource) return { success: false, error: '下载目录中没有可导入文件' }
+      realPath = path.dirname(resource).replace(/[\\/]/g, '\\')
     }
     // console.log('写入', txtFilePath)
     fs.writeFileSync(txtFilePath, realPath + '\n', 'utf8')
@@ -87,9 +91,24 @@ function resolveScriptsDir(): string {
 // 查找 texture 文件
 // ========================
 function findTextureFile(dir: string): string | null {
-  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return null
-  const files = fs.readdirSync(dir)
   const exts = ['.jpg', '.jpeg', '.png', '.tif', '.tiff', '.bmp', '.gif']
-  const file = files.find((f) => exts.includes(path.extname(f).toLowerCase()))
-  return file ? path.join(dir, file) : null
+  return findResourceFile(dir, exts)
+}
+
+/** 查找多文件下载及ZIP子目录中的实际资源，不跟随符号链接。 */
+export const findResourceFile = (target: string, extensions: string[]): string | null => {
+  if (!fs.existsSync(target)) return null
+  const info = fs.lstatSync(target)
+  if (info.isSymbolicLink()) return null
+  if (info.isFile()) return extensions.includes(path.extname(target).toLowerCase()) ? target : null
+  if (!info.isDirectory()) return null
+  for (const row of fs.readdirSync(target, { withFileTypes: true })) {
+    if (row.isFile() && extensions.includes(path.extname(row.name).toLowerCase())) return path.join(target, row.name)
+  }
+  for (const row of fs.readdirSync(target, { withFileTypes: true })) {
+    if (!row.isDirectory()) continue
+    const found = findResourceFile(path.join(target, row.name), extensions)
+    if (found) return found
+  }
+  return null
 }

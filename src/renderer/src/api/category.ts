@@ -1,18 +1,12 @@
 import { request } from '@/utils/request'
-import { Category } from '@/types/CateItem'
+import type { Category, CategoryWithChildren } from '@/types/CateItem'
 
-/**
- * 获取分类带分页
- * /web/cate/byId
- * @param type - 页面类型
- * @param pageNum - 页码
- * @param pageSize - 条数
- * @param parentId - 父级ID
- */
-export const categoryListGetApi = (type: string, parentId: string | null = null) => {
-  return request<Category[]>({
-    method: 'GET',
-    url: '/web/cate/byId',
-    params: { type, parentId }
+/** 公开分类入口，保留客户端三级分类的直属子级读取方式。 */
+export const categoryListGetApi = async (type: string, parentId: string | null = null) => {
+  if (!parentId) return request<Category[]>({ url: '/cate-first', params: { pageType: type } })
+  const result = await request<CategoryWithChildren[]>({
+    url: '/cate-sub',
+    params: { cateId: parentId }
   })
+  return { ...result, data: result.data[0]?.subCategories ?? [] }
 }

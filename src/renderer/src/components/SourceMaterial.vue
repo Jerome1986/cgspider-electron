@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useMaterialStore, usePageTypeStore, usePathStore, useUserStore } from '@/stores'
-import { onMounted, ref } from 'vue'
+import { useMaterialStore, usePathStore, useUserStore } from '@/stores'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { handleWheel, itemSize } from '@/utils/Wheel'
 import SkeletonSourceMaterial from '@/components/SkeletonSourceMaterial.vue'
 import { useRoute } from 'vue-router'
@@ -8,7 +8,7 @@ import { ElMessage } from 'element-plus'
 import { MaterialItem } from '@/types/Material'
 import { materialListLoveApi } from '@/api/material'
 import { useClipboard } from '@vueuse/core'
-import { downloadVerify, onDone, onProgress } from '@/utils/download'
+import { downloadMaterial, onProgress } from '@/utils/download'
 import CustomImagePreview from '@/components/CustomImagePreview.vue'
 import { watermarkGetApi } from '@/api/watermark'
 import router from '@/router'
@@ -25,7 +25,6 @@ const handleCopyName = async (name: string) => {
 const materialStore = useMaterialStore()
 const userStore = useUserStore()
 const pathStore = usePathStore()
-const pageTypeStore = usePageTypeStore()
 
 // 获取当前路由对象
 const route = useRoute()
@@ -40,21 +39,7 @@ const handleDownload = async (item: MaterialItem) => {
     ElMessage.error('请先设置下载路径')
     return
   }
-  // todo 下载前验证 --- 未通过函数内部会阻止
-  await downloadVerify(item._id, userStore.userInfo._id)
-  // 下载逻辑
-  const subDirs = [pageTypeStore.currentPageType, item.name]
-  const url = item.files_url
-  const materialId = item._id
-  // 3) 发起主进程下载（注意 Windows 反斜杠问题交由主进程处理，无需手动替换）
-  const fileName = `${item.name}` // 可带扩展名，或让主进程用服务器文件名
-  const res = await window.electron.ipcRenderer.invoke('download-file', { url, fileName, saveDir, subDirs, materialId })
-  console.log(res)
-  if (!res?.ok) {
-    ElMessage.error('下载启动失败')
-    return
-  }
-  ElMessage.success('开始下载')
+  await downloadMaterial(item)
 }
 
 // 处理素材功能
@@ -116,19 +101,22 @@ const handleView = (url: string) => {
 const watermarkUrl = ref('')
 const watermarkGet = async () => {
   const res = await watermarkGetApi(2)
-  watermarkUrl.value = res.data[0].images
+  watermarkUrl.value = res.data?.images || ''
   console.log('水印', watermarkUrl.value)
   // 设置CSS变量
   document.documentElement.style.setProperty('--watermark-url', `url(${watermarkUrl.value})`)
 }
 
 onMounted(() => {
-  watermarkGet()
+  watermarkGet().catch(() => {})
   // 通过滚轮动态控制尺寸
   document.addEventListener('wheel', handleWheel, { passive: false })
   // 监听下载进度
   window.electron.ipcRenderer.on('download-progress', onProgress)
-  window.electron.ipcRenderer.on('download-done', onDone)
+})
+onUnmounted(() => {
+  document.removeEventListener('wheel', handleWheel)
+  window.electron.ipcRenderer.removeListener('download-progress', onProgress)
 })
 </script>
 <template>

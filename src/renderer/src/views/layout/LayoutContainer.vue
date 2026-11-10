@@ -1,10 +1,10 @@
 <!--suppress ALL -->
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, watch } from 'vue'
 import { menuList } from '@/config/menu'
 import { useRouter } from 'vue-router'
 import CgsHeader from '@/components/CgsHeader.vue'
-import { useCategoryStore, useLanguageStore, usePageTypeStore, useTagStore } from '@/stores'
+import { useCategoryStore, useLanguageStore, usePageTypeStore, useTagStore, useMaterialStore } from '@/stores'
 
 // 定义store
 const pageTypeStore = usePageTypeStore()
@@ -16,23 +16,27 @@ const languageStore = useLanguageStore()
 // 路由
 const router = useRouter()
 // 用计算属性根据当前路径来跳转
-const tabActiveIndex = computed(() => {
-  console.log('tabActiveIndex', tabActiveIndex.value)
-  // 将当前路径保存，方便根据页面类型请求数据
-  pageTypeStore.setCurrentPagePath(router.currentRoute.value.path)
-  pageTypeStore.setCurrentPageType(router.currentRoute.value.path)
-  // 类型切换重置分类
-  categoryStore.setCurrentCateId('')
-  categoryStore.setCurrentSubCateId('')
-  categoryStore.setCurrentThirdCateId('')
-  // 重置标签
-  tagStore.selectedAittribuleTag = []
-  tagStore.selectedColorTag = []
-
-  return router.currentRoute.value.path
-})
-
-onMounted(() => console.log('mounted', pageTypeStore.currentPageType, pageTypeStore.currentPagePath))
+const tabActiveIndex = computed(() => router.currentRoute.value.path)
+watch(
+  () => router.currentRoute.value.path,
+  (routePath) => {
+    // 将当前路径保存，方便根据页面类型请求数据
+    pageTypeStore.setCurrentPagePath(routePath)
+    pageTypeStore.setCurrentPageType(routePath)
+    // 类型切换重置分类
+    categoryStore.setCurrentCateId('')
+    categoryStore.setCurrentSubCateId('')
+    categoryStore.setCurrentThirdCateId('')
+    // 重置标签
+    tagStore.selectedAittribuleTag = []
+    tagStore.selectedColorTag = []
+    categoryStore.subCateList = []
+    categoryStore.thirdCateList = []
+    useMaterialStore().setPageNum(1)
+    useMaterialStore().keyword = ''
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

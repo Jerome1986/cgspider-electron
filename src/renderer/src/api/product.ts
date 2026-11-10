@@ -1,5 +1,5 @@
 import { request } from '@/utils/request'
-import { ProductItem } from '@/types/ProductItem'
+import type { ProductItem } from '@/types/ProductItem'
 
 /**
  * 获取产品列表
@@ -7,6 +7,6 @@ import { ProductItem } from '@/types/ProductItem'
 export const productsGetApi = () => {
   return request<ProductItem[]>({
     method: 'GET',
-    url: '/products-get'
+    url: '/api/products-get'
   })
 }
