@@ -38,6 +38,10 @@ export const useMaterialStore = defineStore(
     }
     const keyword = ref('')
     let requestVersion = 0
+    const cancelListRequest = () => {
+      requestVersion++
+      loading.value = false
+    }
     const clearSession = () => {
       requestVersion++
       listCache.clear()
@@ -255,6 +259,7 @@ export const useMaterialStore = defineStore(
 
     return {
       clearSession,
+      cancelListRequest,
       localDownloads,
       rememberLocal,
       localMaterialIds,

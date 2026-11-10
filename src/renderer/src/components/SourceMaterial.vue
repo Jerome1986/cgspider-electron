@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMaterialStore, usePathStore, useUserStore } from '@/stores'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onActivated, onDeactivated, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { handleWheel, itemSize } from '@/utils/Wheel'
 import SkeletonSourceMaterial from '@/components/SkeletonSourceMaterial.vue'
 import { useRoute } from 'vue-router'
@@ -28,6 +28,25 @@ const pathStore = usePathStore()
 
 // 获取当前路由对象
 const route = useRoute()
+const pagePath = route.path
+const active = ref(true)
+// 每页保留最近 200 张卡片，隐藏卡片复用原图片节点。
+const retainedItems = shallowRef<MaterialItem[]>([])
+const visibleIds = computed(() => new Set(materialStore.materialList.map((item) => item._id)))
+const visibleOrder = computed(() => new Map(materialStore.materialList.map((item, index) => [item._id, index])))
+const retainList = (list: MaterialItem[]) => {
+  if (!active.value || route.path !== pagePath) return
+  const ids = new Set(list.map((item) => item._id))
+  retainedItems.value = [...retainedItems.value.filter((item) => !ids.has(item._id)), ...list].slice(-200)
+}
+watch(() => materialStore.materialList, retainList, { immediate: true, flush: 'sync' })
+onActivated(() => {
+  active.value = true
+  retainList(materialStore.materialList)
+})
+onDeactivated(() => {
+  active.value = false
+})
 
 // 处理下载
 const handleDownload = async (item: MaterialItem) => {
@@ -109,15 +128,19 @@ const watermarkGet = async () => {
 
 onMounted(() => {
   watermarkGet().catch(() => {})
+})
+onActivated(() => {
   // 通过滚轮动态控制尺寸
   document.addEventListener('wheel', handleWheel, { passive: false })
   // 监听下载进度
   window.electron.ipcRenderer.on('download-progress', onProgress)
 })
-onUnmounted(() => {
+const cleanupListeners = () => {
   document.removeEventListener('wheel', handleWheel)
   window.electron.ipcRenderer.removeListener('download-progress', onProgress)
-})
+}
+onDeactivated(cleanupListeners)
+onUnmounted(cleanupListeners)
 </script>
 <template>
   <SkeletonSourceMaterial
@@ -128,15 +151,17 @@ onUnmounted(() => {
   />
   <div v-show="materialStore.materialList.length" class="sourceMaterial" :aria-busy="materialStore.loading">
     <div
-      v-for="(item, index) in materialStore.materialList"
+      v-for="item in retainedItems"
+      v-show="visibleIds.has(item._id)"
       :key="item._id"
+      :style="{ order: visibleOrder.get(item._id) ?? 0 }"
       class="materialItem"
       draggable="true"
       @dragstart.prevent="onDragStart(item._id)"
     >
       <!-- 使用 el-image 替换背景图 -->
       <el-image
-        :lazy="index >= 8"
+        lazy
         class="material-image"
         :src="item.cover_url"
         :zoom-rate="1.2"

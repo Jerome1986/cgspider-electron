@@ -10,6 +10,25 @@ import { useCategoryStore, useLanguageStore, usePageTypeStore, useTagStore, useM
 const pageTypeStore = usePageTypeStore()
 const categoryStore = useCategoryStore()
 const tagStore = useTagStore()
+const materialStore = useMaterialStore()
+const browsingPaths = ['/material', '/model', '/maps', '/lighting']
+// 四个素材页面分别保存筛选和列表，退出布局时释放。
+const cloneState = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
+const capture = () => ({
+  category: cloneState(categoryStore.$state),
+  tags: cloneState(tagStore.$state),
+  material: cloneState({
+    pageNum: materialStore.pageNum,
+    pageSize: materialStore.pageSize,
+    keyword: materialStore.keyword,
+    collect: materialStore.collect,
+    download: materialStore.download,
+    checkListFilter: materialStore.checkListFilter,
+    materialList: materialStore.materialList,
+    materialTotal: materialStore.materialTotal
+  })
+})
+const sessions = new Map<string, ReturnType<typeof capture>>()
 // 语言开关
 const languageStore = useLanguageStore()
 
@@ -19,21 +38,35 @@ const router = useRouter()
 const tabActiveIndex = computed(() => router.currentRoute.value.path)
 watch(
   () => router.currentRoute.value.path,
-  (routePath) => {
+  (routePath, previousPath) => {
+    if (previousPath && browsingPaths.includes(previousPath)) sessions.set(previousPath, capture())
+    materialStore.cancelListRequest()
     // 将当前路径保存，方便根据页面类型请求数据
     pageTypeStore.setCurrentPagePath(routePath)
     pageTypeStore.setCurrentPageType(routePath)
-    // 类型切换重置分类
-    categoryStore.setCurrentCateId('')
-    categoryStore.setCurrentSubCateId('')
-    categoryStore.setCurrentThirdCateId('')
-    // 重置标签
-    tagStore.selectedAittribuleTag = []
-    tagStore.selectedColorTag = []
-    categoryStore.subCateList = []
-    categoryStore.thirdCateList = []
-    useMaterialStore().setPageNum(1)
-    useMaterialStore().keyword = ''
+    const saved = sessions.get(routePath)
+    if (saved) {
+      categoryStore.$patch(saved.category)
+      tagStore.$patch(saved.tags)
+      materialStore.$patch(saved.material)
+    } else {
+      categoryStore.setCurrentCateId('')
+      categoryStore.setCurrentSubCateId('')
+      categoryStore.setCurrentThirdCateId('')
+      categoryStore.subCateList = []
+      categoryStore.thirdCateList = []
+      tagStore.selectedAittribuleTag = []
+      tagStore.selectedColorTag = []
+      tagStore.aittributeTag.forEach((item) => (item.isSelected = false))
+      tagStore.colorList.forEach((item) => (item.isSelected = false))
+      materialStore.setPageNum(1)
+      materialStore.keyword = ''
+      materialStore.setCollect(false)
+      materialStore.setDownload(false)
+      materialStore.checkListFilter = []
+      materialStore.materialList = []
+      materialStore.materialTotal = 0
+    }
   },
   { immediate: true }
 )
@@ -73,7 +106,11 @@ watch(
       <!--   主体内容   -->
       <!--     -->
       <el-main style="margin: 0; padding: 0; border-top: 1px solid #2f2e2e; border-left: 1px solid #2f2e2e">
-        <router-view></router-view>
+        <router-view v-slot="{ Component }">
+          <KeepAlive :include="['MaterialPage', 'ModelPage', 'MapsPage', 'LightingPage']" :max="4">
+            <component :is="Component" />
+          </KeepAlive>
+        </router-view>
       </el-main>
       <!--  底部    -->
       <!--      <el-footer></el-footer>-->

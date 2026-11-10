@@ -4,16 +4,20 @@ import CgsAittribuleTag from '@/components/CgsAittribuleTag.vue'
 import CgsColorTag from '@/components/CgsColorTag.vue'
 import CgsFilter from '@/components/CgsFilter.vue'
 import SourceMaterial from '@/components/SourceMaterial.vue'
-import { onMounted } from 'vue'
+import { onActivated } from 'vue'
+import { useBrowseScroll } from '@/composables/useBrowseScroll'
+
 import { materialListFilter } from '@/composables/materialListFilter'
 
-onMounted(() => {
+const browseElement = useBrowseScroll()
+
+onActivated(() => {
   void materialListFilter()
 })
 </script>
 
 <template>
-  <div class="materialPage">
+  <div ref="browseElement" class="materialPage">
     <el-affix position="top" :offset="51" target=".materialPage">
       <div style="padding: 16px; background-color: #121212">
         <!-- 分类   -->

@@ -20,6 +20,7 @@ const languageStore = useLanguageStore()
 
 // 一级分类
 const selectAllCate = async () => {
+  materialStore.setPageNum(1)
   console.log('全部')
   categoryStore.setCurrentCateId('')
   categoryStore.setCurrentSubCateId('')
@@ -55,6 +56,7 @@ const handleChangeCate = async (cateId: string) => {
 
 // 二级分类点击全部
 const selectAllSub = async () => {
+  materialStore.setPageNum(1)
   categoryStore.setCurrentSubCateId('')
   categoryStore.setCurrentThirdCateId('')
   // 渲染素材
@@ -73,6 +75,7 @@ const selectAllSub = async () => {
 
 // 二级分类发生改变时
 const handleChangeSubCate = async (cateId: string) => {
+  materialStore.setPageNum(1)
   console.log(cateId)
   // 重置三级分类ID
   categoryStore.setCurrentThirdCateId('')
@@ -87,6 +90,7 @@ const handleChangeSubCate = async (cateId: string) => {
 
 // 三级分类全部
 const selectAllThird = async () => {
+  materialStore.setPageNum(1)
   categoryStore.setCurrentThirdCateId('')
   // 渲染素材
   await materialStore.materialListFilterGet(
@@ -104,6 +108,7 @@ const selectAllThird = async () => {
 
 // 三级分类改变时
 const handleChangeThirdCate = async (cateId: string) => {
+  materialStore.setPageNum(1)
   console.log(cateId)
   // 存入当前的三级分类ID
   categoryStore.setCurrentThirdCateId(cateId)
